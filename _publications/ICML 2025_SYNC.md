@@ -4,7 +4,7 @@ collection: publications
 category: conferences
 permalink: /publication/Learning Time-Aware Causal Representation for Model Generalization in Evolving Domains
 excerpt: 'This paper propose SYNC, a novel method for evolving domain generalization that learns time-aware causal representations by modeling dynamic causal factors and mechanism drifts, achieving robust generalization across temporal domains.'
-date: 2025
+date: 2025-05-01
 venue: 'ICML 2025'
 paperurl: 'https://arxiv.org/abs/2506.17718'
 codeurl: 'https://github.com/BIT-DA/SYNC'
