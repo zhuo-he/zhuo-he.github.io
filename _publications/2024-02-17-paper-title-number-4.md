@@ -1,13 +1,13 @@
 ---
-title: "Paper Title Number 4"
+title: "Learning Time-Aware Causal Representation for Model Generalization in Evolving Domains"
 collection: publications
 category: conferences
-permalink: /publication/2024-02-17-paper-title-number-4
-excerpt: 'This paper is about fixing template issue #693.'
-date: 2024-02-17
-venue: 'GitHub Journal of Bugs'
-paperurl: 'http://academicpages.github.io/files/paper3.pdf'
-citation: 'Your Name, You. (2024). &quot;Paper Title Number 3.&quot; <i>GitHub Journal of Bugs</i>. 1(3).'
+permalink: /publication/Learning Time-Aware Causal Representation for Model Generalization in Evolving Domains
+excerpt: 'This paper propose SYNC, a novel method for evolving domain generalization that learns time-aware causal representations by modeling dynamic causal factors and mechanism drifts, achieving robust generalization across temporal domains.'
+date: 2025
+venue: 'ICML 2025'
+paperurl: 'https://arxiv.org/abs/2506.17718'
+codeurl: 'https://github.com/BIT-DA/SYNC'
 ---
 
-The contents above will be part of a list of publications, if the user clicks the link for the publication than the contents of section will be rendered as a full page, allowing you to provide more information about the paper for the reader. When publications are displayed as a single page, the contents of the above "citation" field will automatically be included below this section in a smaller font.
+Abstract: Endowing deep models with the ability to generalize in dynamic scenarios is of vital significance for real-world deployment, given the continuous and complex changes in data distribution. Recently, evolving domain generalization (EDG) has emerged to address distribution shifts over time, aiming to capture evolving patterns for improved model generalization. However, existing EDG methods may suffer from spurious correlations by modeling only the dependence between data and targets across domains, creating a shortcut between task-irrelevant factors and the target, which hinders generalization. To this end, we design a time-aware structural causal model (SCM) that incorporates dynamic causal factors and the causal mechanism drifts, and propose **S**tatic-D**YN**amic **C**ausal Representation Learning (**SYNC**), an approach that effectively learns time-aware causal representations. Specifically, it integrates specially designed information-theoretic objectives into a sequential VAE framework which captures evolving patterns, and produces the desired representations by preserving intra-class compactness of causal factors both across and within domains. Moreover, we theoretically show that our method can yield the optimal causal predictor for each time domain. Results on both synthetic and real-world datasets exhibit that SYNC can achieve superior temporal generalization performance.
