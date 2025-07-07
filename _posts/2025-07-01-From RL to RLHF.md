@@ -81,7 +81,7 @@ $$H_t=o_1,a_1,r_1,...,o_t,a_t,r_t.$$
 
 $$V_\pi(s)=\mathbb{E}_\pi[G_t\mid s_t=s]=\mathbb{E}_\pi[\sum_{k=0}^{∞} \gamma^k r_{t+k+1}\mid s_t=s].$$
 
-其中 $$G_t=\sum_{k=0}^{∞} \gamma^k r_{t+k+1}$$ 表示未来某一决策链下的长期累积奖励。 $$V_\pi(s)$$ 被称为状态价值函数，还有一种动作价值函数 $$Q_\pi(s,a)$$，相比 $$V_\pi(s)$$，其未来可以取得的累积奖励期望还取决于动作：
+其中折扣回报 $$G_t=\sum_{k=0}^{\infin} \gamma^k r_{t+k+1}$$ 表示未来某一决策链下的长期累积奖励，下标 $$\pi$$ 表示使用策略 $$\pi$$ 的时候获得的回报。 $$V_\pi(s)$$ 被称为状态价值函数，还有一种动作价值函数 $$Q_\pi(s,a)$$，相比 $$V_\pi(s)$$，其未来可以取得的累积奖励期望还取决于动作：
 
 $$Q_\pi(s,a)=\mathbb{E}_\pi[G_t\mid s_t=s,a_t=a]=\mathbb{E}_\pi[\sum_{k=0}^{∞} \gamma^k r_{t+k+1}\mid s_t=s,a_t=a].$$
 
@@ -91,12 +91,48 @@ $$Q_\pi(s,a)=\mathbb{E}_\pi[G_t\mid s_t=s,a_t=a]=\mathbb{E}_\pi[\sum_{k=0}^{∞}
 - **基于策略的智能体（Policy-based agent）**，直接学习策略，并没有学习价值函数。->基于策略的迭代
 - **演员-评论员智能体（Actor-Critic agent）**，它同时学习策略和价值函数，然后通过两者的交互得到最佳的动作。
 
+# 2. 马尔可夫决策过程
+
+## 2.1. 马尔可夫奖励过程
+
+**马尔可夫奖励过程（Markov Reward Process）**就是在马尔可夫链的基础上，加上了奖励函数，下面进行介绍。
+
+对于有限步数的 MRP，折扣回报 $$G_t$$ 定义为 $$G_t=\sum_{k=0}^{T-t-1} \gamma^{k}r_{t+k+1}$$，状态价值函数 $$V(s_t)=\mathbb{E}_\pi[G_t\mid s_t]$$。下面给出**贝尔曼方程（Bellman Equation）**，它刻画了当前状态的价值与未来状态价值之间的联系：
+
+$$
+V(s_t)=R(s_t)+\gamma \sum_{s_{t+1}} p(s_{t+1}\mid s_t)V(s_{t+1})
+$$
+
+$$R(s_t)=\mathbb{E}[r_{t+1}\mid s_t]$$ 为即时回报。下面我们来证明这个等式，首先证明下面这样一个等式：
+
+$$
+\mathbb{E} [G(s_{t+1})\mid s_t]=\mathbb{E}[V(s_{t+1})\mid s_t]
+$$
+
+这个等式表明，在给定 t 时刻状态 $$s_t$$下， t+1 时刻的价值期望与折扣回报期望相同。直观上来说，这个等式成立是因为随机变量 $$G(s_{t+1})$$ 的不确定性来自两个方面：①状态 $$s_t$$ 转移到状态 $$s_{t+1}$$；②状态 $$s_{t+1}$$ 之后的随机决策链。第②项的期望即为 $$V(s_{t+1})$$，再对第一层求平均即为给定 $$s_t$$ 下 $$G(s_{t+1})$$ 的期望。下面用公式证明：
+
+由重期望公式 $$\mathbb{E}[X]=\mathbb{E}[\mathbb{E}[X\mid Y]]$$，可以得到 $$\mathbb{E}[X\mid Z]=\mathbb{E}[\mathbb{E}[X\mid Y,Z]\mid Z]$$ 
+
 $$
 \begin{aligned}
-a^2 + b^2 &= c^2 \\
-E &= mc^2 \\
-\int_0^1 x^2\,dx &= \frac{1}{3}
+\mathbb{E}[G(s_{t+1})\mid s_t]&=\mathbb{E}[\mathbb{E}[G(s_{t+1})\mid s_{t+1},s_t]\mid s_t] \\
+&=\mathbb{E}[\mathbb{E}[G(s_{t+1})\mid s_{t+1}]\mid s_t] \\
+&=\mathbb{E}[V(s_{t+1})\mid s_t]
 \end{aligned}
 $$
+
+继续证明贝尔曼方程：
+
+$$
+\begin{aligned}
+V(s_t)&=\mathbb{E}[\sum_{k=0}^{T-t-1} \gamma^k r_{t+k+1}\mid s_t]\\
+&=\mathbb{E}[r_{t+1}+\sum_{k=1}^{T-t-1}\gamma^k r_{t+k+1}\mid s_t]\\
+&=\mathbb{E}[r_{t+1}\mid s_t]+\gamma \mathbb{E}[G(s_{t+1})\mid s_t]\\
+&=R(s_{t}) +\gamma \mathbb{E}[V(s_{t+1})\mid s_t]\\
+&=R(s_{t})+\gamma \sum_{s_{t+1}}p(s_{t+1}\mid s_t) V(s_{t+1})
+\end{aligned}
+$$
+
+注：由于 $$r_{t+1},G(s_{t+1}),V(s_{t+1})$$ 均为随机变量 $$s_{t+1}$$ 的函数，因此上面原始表达式都是对 $$s_{t+1}$$ 求期望。
 
 to be continued
