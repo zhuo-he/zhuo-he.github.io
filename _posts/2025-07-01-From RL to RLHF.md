@@ -91,4 +91,12 @@ $$Q_\pi(s,a)=\mathbb{E}_\pi[G_t\mid s_t=s,a_t=a]=\mathbb{E}_\pi[\sum_{k=0}^{∞}
 - **基于策略的智能体（Policy-based agent）**，直接学习策略，并没有学习价值函数。->基于策略的迭代
 - **演员-评论员智能体（Actor-Critic agent）**，它同时学习策略和价值函数，然后通过两者的交互得到最佳的动作。
 
+$$
+\begin{aligned}
+a^2 + b^2 &= c^2 \\
+E &= mc^2 \\
+\int_0^1 x^2\,dx &= \frac{1}{3}
+\end{aligned}
+$$
+
 to be continued
