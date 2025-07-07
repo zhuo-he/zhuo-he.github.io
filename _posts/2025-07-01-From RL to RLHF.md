@@ -95,9 +95,9 @@ $$Q_\pi(s,a)=\mathbb{E}_\pi[G_t\mid s_t=s,a_t=a]=\mathbb{E}_\pi[\sum_{k=0}^{∞}
 
 ## 2.1. 马尔可夫奖励过程
 
-**马尔可夫奖励过程（Markov Reward Process）**就是在马尔可夫链的基础上，加上了奖励函数，下面进行介绍。
+**马尔可夫奖励过程（Markov Reward Process, MRP）**就是在马尔可夫链的基础上，加上了奖励函数，下面进行介绍。
 
-对于有限步数的 MRP，折扣回报 $$G_t$$ 定义为 $$G_t=\sum_{k=0}^{T-t-1} \gamma^{k}r_{t+k+1}$$，状态价值函数 $$V(s_t)=\mathbb{E}_\pi[G_t\mid s_t]$$。下面给出**贝尔曼方程（Bellman Equation）**，它刻画了当前状态的价值与未来状态价值之间的联系：
+对于有限步数的 MRP，折扣回报 $$G_t$$ 定义为 $$G_t=\sum_{k=0}^{T-t-1} \gamma^{k}r_{t+k+1}$$，**状态价值函数** $$V(s_t)=\mathbb{E}_\pi[G_t\mid s_t]$$。下面给出**贝尔曼方程（Bellman Equation）**，它刻画了当前状态的价值与未来状态价值之间的联系：
 
 $$
 V(s_t)=R(s_t)+\gamma \sum_{s_{t+1}} p(s_{t+1}\mid s_t)V(s_{t+1})
@@ -134,5 +134,74 @@ V(s_t)&=\mathbb{E}[\sum_{k=0}^{T-t-1} \gamma^k r_{t+k+1}\mid s_t]\\
 $$
 
 注：由于 $$r_{t+1},G(s_{t+1}),V(s_{t+1})$$ 均为随机变量 $$s_{t+1}$$ 的函数，因此上面原始表达式都是对 $$s_{t+1}$$ 求期望。
+
+## 2.2. 马尔可夫决策过程
+
+相较于 MRP，**马尔可夫决策过程（Markov Decision Process, MDP）**多了决策，在发生状态转移时，未来的状态不仅取决于当前的状态，还依赖于智能体在当前采取的动作，即 $$p(s_{t+1}\mid s_t,a_t)$$，奖励函数为 $$R(s_t,a_t)=\mathbb{E}[r_{t+1}\mid s_t,a_t]$$，**策略**为决定智能体当前应当采取什么动作的函数，其被定义为 $$\pi(a_t\mid s_t)=p(a_t\mid s_t)$$。
+
+通过条件概率公式，MDP 可以转化为 MRP，即状态转移与奖励与智能体动作无关：
+
+$$
+p_\pi(s_{t+1}\mid s_t)=\sum_{a_t}p(s_{t+1}\mid s_t,a_t)\pi(a_t\mid s_t)\\
+$$
+
+$$
+\begin{aligned}
+\sum_{a_t}R(s_t,a_t)\pi(a_t\mid s_t)&=\sum_{a_t}\mathbb{E}[r_{t+1}\mid s_t,a_t]\pi(a_t\mid s_t)\\
+&=\sum_{a_t}\sum_{s_{t+1}}r_{t+1}p(s_{t+1}\mid s_t,a_t)\pi(a_t\mid s_t)\\
+&=\sum_{s_{t+1}}r_{t+1}p(s_{t+1}\mid s_t)\\
+&=R(s_t)
+\end{aligned}
+$$
+
+即：
+
+$$
+R_\pi(s_t)=\sum_{a_t}R(s_t,a_t)\pi(a_t\mid s_t)
+$$
+
+看完了 MDP 的状态、动作和奖励后，我们来看 MDP 的价值函数。MDP 的状态价值函数定义为 $$V_\pi(s_t)=\mathbb{E}[G_t\mid s_t]$$，由于 MDP 还与动作有关，因此引入**动作价值函数Q函数** $$Q(s_t,a_t)=\mathbb{E}[G_t\mid s_t,a_t]$$。$$Q(s_t,a_t)$$与 $$V_\pi(s_t)$$ 也可以相互转化：
+
+$$
+V_\pi(s_t)=\sum_{a_t}Q(s_t,a_t)\pi(a_t\mid s_t)
+$$
+
+**Q函数的贝尔曼方程**给出了当前状态的动作价值与未来状态的状态价值之间的关联：
+
+$$
+Q(s_t,a_t)=R(s_t,a_t)+\gamma\sum_{s_{t+1}}p(s_{t+1}\mid s_t,a_t)V_\pi(s_{t+1})
+$$
+
+证明：
+
+$$
+\begin{aligned}
+Q(s_t,a_t)&=\mathbb{E}[G_t\mid s_t,a_t]\\
+&=\mathbb{E}[\sum_{k=0}^{T-t-1}\gamma^k r_{t+k+1}\mid s_t,a_t]\\
+&=\mathbb{E}[r_{t+1}\mid s_t,a_t]+\gamma\mathbb{E}[G_{t+1}\mid s_t,a_t]\\
+&=R(s_t,a_t)+\gamma \mathbb{E}[V_\pi(s_{t+1})\mid s_t,a_t]\\
+&=R(s_t,a_t)+\gamma\sum_{s_{t+1}}p(s_{t+1}\mid s_t,a_t)V_\pi(s_{t+1})
+\end{aligned}
+$$
+
+然而，Q函数的贝尔曼方程没有给出当前状态的状态/动作价值与未来状态的状态/动作价值之间的关系。但是这其实并不难，因为组合上面的式子，通过简单变换得到的**贝尔曼期望方程**就可以给出：
+
+$$
+\begin{aligned}
+V_\pi(s_t)&=\sum_{a_t}\pi(a_t\mid s_t)Q(s_t,a_t)\\
+&=\sum_{a_t}\pi(a_t\mid s_t)[R(s_t,a_t)+\gamma\sum_{s_{t+1}}p(s_{t+1}\mid s_t,a_t)V_\pi(s_{t+1})]
+\end{aligned}
+$$
+
+$$
+\begin{aligned}
+Q(s_t,a_t)&=R(s_t,a_t)+\gamma\sum_{s_{t+1}}p(s_{t+1}\mid s_t,a_t)V_\pi(s_{t+1})\\
+&=R(s_t,a_t)+\gamma\sum_{s_{t+1}}p(s_{t+1}\mid s_t,a_t)\sum_{a_t}\pi(a_{t+1}\mid s_{t+1})Q(s_{t+1},a_{t+1})
+\end{aligned}
+$$
+
+上面两式分别为**基于状态价值的贝尔曼期望方程**和**基于动作价值的贝尔曼期望方程**。
+
+简单总结一下 MRP 与 MDP：MRP 相较于经典马尔可夫过程多了奖励，MDP 相较于 MRP 多了决策过程。由于多了一个决策，多了一个动作，因此状态转移也多了一个条件，即执行一个动作，导致未来状态的变化，其不仅依赖于当前的状态，也依赖于在当前状态下智能体采取的动作决定的状态变化。对于价值函数，它也多了一个条件，多了一个当前的动作，即当前状态以及采取的动作会决定当前可能得到的奖励的多少。此外，MDP 和 MRP 是可以相互转化的。
 
 to be continued
