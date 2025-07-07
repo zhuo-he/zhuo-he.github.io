@@ -16,7 +16,7 @@ This blog is written to record the study of RLHF in LLM, starting from reinforce
 
 强化学习由两部分组成：智能体（agent）和环境（environment）。在强化学习过程中，智能体与环境一直在交互。智能体在环境中获取某个状态（state）后，它会利用该状态输出一个动作（action），然后这个动作会在环境中被执行，环境会根据智能体采取的动作，输出下一个状态以及当前这个动作带来的奖励（reward）。智能体的目的就是尽可能多地从环境中获取奖励。
 
-![img](rlhf/1-1.png)
+![img](/images/blogs/rlhf/1-1.png)
 
 来看一些日常生活中强化学习的例子：（1）股票交易，我们可以不断地买卖股票，然后根据市场给出的反馈来学会怎么去买卖股票才可以让我们的收益最大化。（2）玩雅达利游戏或者其他电脑游戏，我们通过不断试错去探索怎么玩才能通关。
 
