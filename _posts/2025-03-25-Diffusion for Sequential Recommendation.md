@@ -72,7 +72,7 @@ user的perference会随时间变化，近期的交互能更准确表达用户的
 
 ### 2.1. Setting
 
-给定user set $$\mathcal{U}=\{u_1,u_2,\cdots,u_{\mid \mathcal{U}\mid}\}$$，item set $$\mathcal{V}=\{v_1,v_2,\cdots,v_{|\mathcal{V}|}\}$$，每个user的交互历史 $$\mathcal{S}_u=\{v_1^u,\cdots,v_{n_u}^u\}$$，需要利用历史信息为user进行推荐。
+给定user set $$\mathcal{U}=\{u_1,u_2,\cdots,u_{\mid \mathcal{U}\mid}\}$$，item set $$\mathcal{V}=\{v_1,v_2,\cdots,v_{\mid \mathcal{V}\mid}\}$$，每个user的交互历史 $$\mathcal{S}_u=\{v_1^u,\cdots,v_{n_u}^u\}$$，需要利用历史信息为user进行推荐。
 
 ### 2.2. DDRM
 
@@ -154,7 +154,7 @@ user的perference会随时间变化，近期的交互能更准确表达用户的
 
 - Forward Process
 
-1. 利用一个learnable embedding table $$\mathbf{E}\in \mathbb{R}^{|\mathcal{V}\times d|}$$ 将 $$\mathcal{S}_=\{v_{-M},v_{-M+1},\cdots,v_{-1}\}$$
+1. 利用一个learnable embedding table $$\mathbf{E}\in \mathbb{R}^{\mid \mathcal{V}\times d\mid}$$ 将 $$\mathcal{S}_=\{v_{-M},v_{-M+1},\cdots,v_{-1}\}$$
 2. 对 $$\mathbf{x}_0$$ 加噪至 $$\mathbf{x}_T\sim \mathcal{N}(\mathbf{0},\mathbf{I}^{M\times d})$$
 3. 在实际实现中，取user交互sequence的前 $$M$$个item作为 $$\mathcal{S}_{aug}$$
 
