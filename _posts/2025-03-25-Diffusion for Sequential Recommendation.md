@@ -10,7 +10,7 @@
 
 ### 1.1. Setting
 
-给定user $$u$$和他在item set $$\mathcal{I}$$上的交互历史 $$\mathbf{x}_u=\\{x_u^1,x_u^2,\cdots,x_u^{\mid \mathcal{I}\mid}\\}$$ ，其中 $$x_u^i=0 \text{or} 1$$表示user是否与第 $$i$$个item进行交互，目的是推断出user与所有item的交互概率。
+给定user $$u$$和他在item set $$\mathcal{I}$$上的交互历史 $$\mathbf{x}_u=\{x_u^1,x_u^2,\cdots,x_u^{\mid \mathcal{I}\mid}\}$$ ，其中 $$x_u^i=0 \text{or} 1$$表示user是否与第 $$i$$个item进行交互，目的是推断出user与所有item的交互概率。
 
 ### 1.2. DiffRec
 
