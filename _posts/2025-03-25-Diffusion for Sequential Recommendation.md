@@ -10,7 +10,7 @@
 
 ### 1.1. Setting
 
-给定user $u$和他在item set $\mathcal{I}$上的交互历史$\mathbf{x}_u=\{x_u^1,x_u^2,\cdots,x_u^{\mid \mathcal{I}\mid}\}$ ，其中$x_u^i=0\ \text{or}\ 1$表示user是否与第$i$个item进行交互，目的是推断出user与所有item的交互概率。
+给定user $u$和他在item set $\mathcal{I}$上的交互历史 $\mathbf{x}\_u=\\\{x\_u^1,x\_u^2,\cdots,x\_u^{\mid \mathcal{I}\mid}\\\}$ ，其中 $x\_u^i=0\\ \text{or}\\ 1$表示user是否与第 $i$个item进行交互，目的是推断出user与所有item的交互概率。
 
 ### 1.2. DiffRec
 
@@ -37,7 +37,7 @@
 
 ![image.png](/images/blogs/diffusion for sr/image.png)
 
-1. training 类似 DDPM，但loss是估计input $x_0$而非noise
+1. training 类似 DDPM，但loss是估计input $x\_0$而非noise
 2. 前向加噪并不逼近标准正态分布，这里是否有理论保证？
 3. importance sampling
 
@@ -54,9 +54,9 @@
 ![image.png](/images/blogs/diffusion for sr/image%202.png)
 
 1. 利用 LightGCN 得到item embedding
-2. k-means聚类成$c$个类别
+2. k-means聚类成 $c$个类别
 3. 每类用一个 VAE 编码到latent space，在latent space进行forward和reverse
-4. 通过多个decoder重构$\hat{x}_0$
+4. 通过多个decoder重构 $\hat{x}\_0$
 
 - T-DiffRec
 
@@ -72,7 +72,7 @@ user的perference会随时间变化，近期的交互能更准确表达用户的
 
 ### 2.1. Setting
 
-给定user set $\mathcal{U}=\{u_1,u_2,\cdots,u_{|\mathcal{U}|}\}$，item set$\mathcal{V}=\{v_1,v_2,\cdots,v_{|\mathcal{V}|}\}$，每个user的交互历史$\mathcal{S}_u=\{v_1^u,\cdots,v_{n_u}^u\}$，需要利用历史信息为user进行推荐。
+给定user set $\mathcal{U}=\\\{u\_1,u\_2,\cdots,u\_{|\mathcal{U}|}\\\}$，item set $\mathcal{V}=\\\{v\_1,v\_2,\cdots,v\_{|\mathcal{V}|}\\\}$，每个user的交互历史 $\mathcal{S}\_u=\\\{v\_1^u,\cdots,v\_{n\_u}^u\\\}$，需要利用历史信息为user进行推荐。
 
 ### 2.2. DDRM
 
@@ -99,15 +99,15 @@ user的perference会随时间变化，近期的交互能更准确表达用户的
 
 1. 涉及diffusion部分类似 DDPM，只需注意：
    1. DDRM对pre-trained user, item embedding进行forward和reverse；
-   2. reverse过程额外利用了协同信息作为guidance，即$\tilde{e}_0^u=f_{\theta}(\hat{e}_t^u,c_u,t)$，$\tilde{e}_0^i=f_{\theta}(\hat{e}_t^i,c_i,t)$，其中$c_u,c_i$分别为user和item的协同信息，在实现中分别取item和user的embedding $e_i,e_u$
-2. 在通过DDRM获得去噪后的user和positive embedding后，这些embedding去计算BPR损失$\mathcal{L}_{bpr}$，单个user的loss为diffusion部分loss $\mathcal{L}_{re}$和$\mathcal{L}_{bpr}$之间的trade off。作为扩展，作者还对每个user的loss计算了score $s(u,i)$并利用softmax进行重加权
+   2. reverse过程额外利用了协同信息作为guidance，即 $\tilde{e}\_0^u=f\_{\theta}(\hat{e}\_t^u,c\_u,t)$， $\tilde{e}\_0^i=f\_{\theta}(\hat{e}\_t^i,c\_i,t)$，其中 $c\_u,c\_i$分别为user和item的协同信息，在实现中分别取item和user的embedding $e\_i,e\_u$
+2. 在通过DDRM获得去噪后的user和positive embedding后，这些embedding去计算BPR损失 $\mathcal{L}\_{bpr}$，单个user的loss为diffusion部分loss $\mathcal{L}\_{re}$ 和 $\mathcal{L}\_{bpr}$之间的trade off。作为扩展，作者还对每个user的loss计算了score $s(u,i)$并利用softmax进行重加权
 
 - inference
 
 ![image.png](/images/blogs/diffusion for sr/image%206.png)
 
 1. inference阶段，利用user历史的平均item embedding作为start point，reverse阶段依然用预测均值替换
-2. 在生成 ideal item embedding后，利用rounding function $s(e,e_i)$选出top-k候选item进行推荐
+2. 在生成 ideal item embedding后，利用rounding function $s(e,e\_i)$选出top-k候选item进行推荐
 
 item embedding的shape？
 
@@ -119,7 +119,7 @@ item embedding的shape？
 
 先前提到的推荐系统建模可能会遗漏user的序列行为信息，因此sequential recommendation旨在显式建模用户的序列行为，提升推荐系统的效果。
 
-给定user set $\mathcal{U}=\{u_1,u_2,\cdots,u_{|\mathcal{U}|}\}$，item set$\mathcal{V}=\{v_1,v_2,\cdots,v_{|\mathcal{V}|}\}$，每个user的交互历史$\mathcal{S}_u=\{v_1^u,\cdots,v_{n_u}^u\}$由交互时间进行组织，需要利用历史交互序列信息为user进行推荐。
+给定user set $\mathcal{U}=\\\{u\_1,u\_2,\cdots,u\_{|\mathcal{U}|}\\\}$，item set $\mathcal{V}=\\\{v\_1,v\_2,\cdots,v\_{|\mathcal{V}|}\\\}$，每个user的交互历史  $\mathcal{S}\_u=\\\{v\_1^u,\cdots,v\_{n\_u}^u\\\}$由交互时间进行组织，需要利用历史交互序列信息为user进行推荐。
 
 ## 2. Sequence as Diffusion Target
 
@@ -156,24 +156,24 @@ item embedding的shape？
 
 - Forward Process
 
-1. 利用一个learnable embedding table $\mathbf{E}\in \mathbb{R}^{|\mathcal{V}\times d|}$ 将item identity $\mathcal{S}_{aug}=\{v_{-M},v_{-M+1},\cdots,v_{-1}\}$映射为dense representation并在第0维上stack，得到 $\mathbf{x}_0=\{e_{-M},e_{-M+1},\cdots,e_{-1}\}\in \mathbb{R}^{M\times d}$
-2. 对 $\mathbf{x}_0$ 加噪至 $\mathbf{x}_T\sim \mathcal{N}(\mathbf{0},\mathbf{I}^{M\times d})$
-3. 在实际实现中，取user交互sequence的前$M$个item作为$\mathcal{S}_{aug}$
+1. 利用一个learnable embedding table $\mathbf{E}\in \mathbb{R}^{|\mathcal{V}\times d|}$ 将 $\mathcal{S}\_=\\{v\_{-M},v\_{-M+1},\cdots,v\_{-1}\\}$
+2. 对 $\mathbf{x}\_0$ 加噪至 $\mathbf{x}\_T\sim \mathcal{N}(\mathbf{0},\mathbf{I}^{M\times d})$
+3. 在实际实现中，取user交互sequence的前 $M$个item作为 $\mathcal{S}\_{aug}$
 
 - Reverse Process
 
-1. 类似diffusion做图像生成任务用U-Net建模 $\epsilon_{\theta}$ 预测noise，这里也采用类似的结构预测noise，但是直接利用并不match并且会丢失sequence信息，因此设计Sequential U-Net（SU-Net）
+1. 类似diffusion做图像生成任务用U-Net建模 $\epsilon\_{\theta}$ 预测noise，这里也采用类似的结构预测noise，但是直接利用并不match并且会丢失sequence信息，因此设计Sequential U-Net（SU-Net）
 
    1. SU-Net
       1. 将每个交互过的item embedding reshape为 $\sqrt{d}\times \sqrt{d}$
-      2. 将reshape后的每个embedding独立视作一个channel，因此得到了形状为 $\mathbb{R}^{M\times \sqrt{d}\times \sqrt{d}}$的三维矩阵（因此为了统一channel nums，不够$M$个item的交互sequence会被略过）
+      2. 将reshape后的每个embedding独立视作一个channel，因此得到了形状为 $\mathbb{R}^{M\times \sqrt{d}\times \sqrt{d}}$的三维矩阵（因此为了统一channel nums，不够 $M$个item的交互sequence会被略过）
       3. 这样一方面适配U-Net的输入，另一方面卷积操作能对多通道信息进行融合，能一定程度上保留原来的sequence信息
 2. Guide Strategy
 
    高质量的增强应该对应于原始用户交互序列中包含的偏好，因为不相关的项目可以被认为是noise的交互，从而损害序列推荐模型
 
-   1. 实际实现中，取user交互sequence剩下的部分为$\mathcal{S}_{raw}$，其中包含user的perference信息，因此考虑将其作为guidance注入 $\epsilon_{\theta}$，实现中是取历史交互embedding的average
-   2. 由于建模方式是利用$\mathcal{S}_{aug}$预测$v_1$，因此将$v_1$作为condition，并类似图像生成设计classifier-guided和classifier-free guidance策略
+   1. 实际实现中，取user交互sequence剩下的部分为 $\mathcal{S}\_{raw}$，其中包含user的perference信息，因此考虑将其作为guidance注入 $\epsilon\_{\theta}$，实现中是取历史交互embedding的average
+   2. 由于建模方式是利用 $\mathcal{S}\_{aug}$预测 $v\_1$，因此将 $v\_1$作为condition，并类似图像生成设计classifier-guided和classifier-free guidance策略
 3. 获取augmented sequence
 
    1. 对生成对sequence的每个位置，与item set中的item embedding计算余弦相似度选取最终item
@@ -209,15 +209,15 @@ item embedding的shape？
 
 - Forward Process
 
-1. 为了在连续空间建模，利用一个learnable的embedding table $\mathbf{E}\in \mathbb{R}^{|\mathcal{V}|\times d}$将sequence $\{v_1,v_2,\cdots,v_{T-1},v_T\}$中的每一个$v_t$映射到$\mathbb{R}^d$空间，得到$\mathbf{H}^0=\{h_1^0,h_2^0,\cdots,h_{T-1}^0,h_T^0\}$；由于序列推荐系统的目标是预测next item，因此**只对最后一个item embedding $h_T^0$加噪**
+1. 为了在连续空间建模，利用一个learnable的embedding table $\mathbf{E}\in \mathbb{R}^{|\mathcal{V}|\times d}$将sequence $\\{v\_1,v\_2,\cdots,v\_{T-1},v\_T\\}$中的每一个 $v\_t$映射到 $\mathbb{R}^d$空间，得到 $\mathbf{H}^0=\\{h\_1^0,h\_2^0,\cdots,h\_{T-1}^0,h\_T^0\\}$；由于序列推荐系统的目标是预测next item，因此**只对最后一个item embedding $h\_T^0$加噪**
 
 - Reverse Process
 
-1. 在reverse过程的loss采用预测最开始的embedding的形式，对 $f_{\theta}(h_T^n,n)$ 对结构进行如下设计：
-   1. 借助 Transformer Encoder 将前$T-1$个时刻的embedding $h_{1:T-1}^0$的信息融入最后一个embedding $h_T^n$，**这可以理解成一种隐式的condition**
-   2. 设计一个learnable position embedding matrix $\mathbf{Y}\in \mathbb{R}^{T\times d}$，连同diffusion step embedding $z_n$，连同第$n$步denoising的representation进行concat：$\hat{\mathbf{H}}^n=[h_1^0+y_1+z_n,h_2^0+y_2+z_n,\cdots,h_T^n+y_T+z_n]$
-   3. $f_{\theta}(h_T^n,n)=\text{TransformerEncoder}(\hat{\mathbf{H}}^n)[-1]$
-   4. 利用接softmax的linear将连续空间中的$h^0$映射回离散空间，即$p_{\phi}(v_t|h_t^0)=\text{Softmax}(Wh_t^0+b)$，$W\in \mathbb{R}^{|\mathcal{V}|\times d}$
+1. 在reverse过程的loss采用预测最开始的embedding的形式，对 $f\_{\theta}(h\_T^n,n)$ 对结构进行如下设计：
+   1. 借助 Transformer Encoder 将前$T-1$个时刻的embedding $h\_{1:T-1}^0$的信息融入最后一个embedding $h\_T^n$，**这可以理解成一种隐式的condition**
+   2. 设计一个learnable position embedding matrix $\mathbf{Y}\in \mathbb{R}^{T\times d}$，连同diffusion step embedding $z\_n$，连同第 $n$步denoising的representation进行concat： $\hat{\mathbf{H}}^n=[h\_1^0+y\_1+z\_n,h\_2^0+y\_2+z\_n,\cdots,h\_T^n+y\_T+z\_n]$
+   3.  $f\_{\theta}(h\_T^n,n)=\text{TransformerEncoder}(\hat{\mathbf{H}}^n)[-1]$
+   4. 利用接softmax的linear将连续空间中的$h^0$映射回离散空间，即 $p\_{\phi}(v\_t|h\_t^0)=\text{Softmax}(Wh\_t^0+b)$， $W\in \mathbb{R}^{|\mathcal{V}|\times d}$
 
 - Objective
 
@@ -258,13 +258,13 @@ item embedding的shape？
 
 - Reverse Process
 
-reverse阶段的关键在于设计恰当的方法预测原始embedding，DiffuRec设计了一个Approximator $f_{\theta}$
+reverse阶段的关键在于设计恰当的方法预测原始embedding，DiffuRec设计了一个Approximator $f\_{\theta}$
 
-1. $f_{\theta}(x,d,S)$，$d$为step embedding，$x$为对应step 下的target item的noise embedding，$S$为历史交互序列的信息
-2. $f_{\theta}$的设计如下：
+1.  $f\_{\theta}(x,d,S)$， $d$为step embedding， $x$为对应step 下的target item的noise embedding， $S$为历史交互序列的信息
+2.  $f\_{\theta}$的设计如下：
 
-   1. 将user的历史交互序列映射为embeddings：${e_1,e_2,\cdots,e_n}$，随后利用$x$和$d$建模它们的分布，即$z_i=e_i+\lambda_i\odot (x+d)$，$\lambda_i\sim \mathcal{N}(\delta,\delta)$控制着noise的scale
-   2. 将$[z_1,z_2,\cdots,z_n]$送入一个transformer，取transformer output最后一位作为原始embedding的估计，**这也可以理解为一种隐式的condition**
+   1. 将user的历史交互序列映射为embeddings： ${e\_1,e\_2,\cdots,e\_n}$，随后利用$x$和$d$建模它们的分布，即 $z\_i=e\_i+\lambda\_i\odot (x+d)$， $\lambda\_i\sim \mathcal{N}(\delta,\delta)$控制着noise的scale
+   2. 将 $[z\_1,z\_2,\cdots,z\_n]$送入一个transformer，取transformer output最后一位作为原始embedding的估计，**这也可以理解为一种隐式的condition**
    3. 没有position embedding？
 3. 文中提到
 
@@ -295,12 +295,12 @@ reverse阶段的关键在于设计恰当的方法预测原始embedding，DiffuRe
 
 ![image.png](/images/blogs/diffusion for sr/image%2015.png)
 
-- 过去大多序列推荐的工作都可以归类为**“*learning-to-classify*”**范式，即给定一个positive item，推荐模型执行负采样以添加negative item，并根据user的历史交互序列学习去判断user是否更喜欢它们。这种范式存在以下两点问题：
+- 过去大多序列推荐的工作都可以归类为***learning-to-classify***范式，即给定一个positive item，推荐模型执行负采样以添加negative item，并根据user的历史交互序列学习去判断user是否更喜欢它们。这种范式存在以下两点问题：
 
   - 它可能与人类行为不同，因为人们通常想象一个oracle item，并选择与oracle item最匹配的潜在item
   - 基于候选集的分类是表征用户偏好的一种迂回方式，用于解决仅有正样本可用的问题。1）选择的负样本被限制在一个小的候选集之中，无法精细建模正负样本的决策边界；2）对比学习领域也研究过，简单的负样本无法贡献有效的信息，而过于困难的负样本可能是假阴性的，这会为模型学习引入噪声
-- 为此，本工作提出了**“*learning-to-generate*”**范式，核心思想是基于历史交互序列描述底层数据生成分布，直接生成表示用户偏好的oracle item，并推断出与oracle最匹配的真实item（p.s. 也就是说生成范式能够充分探索item space，并以历史交互作guidance，从而在item space中找到用户最偏好的oracle item）
-- 对于所提出的**“*learning-to-generate*”**范式，本文作者对已有的diffusion for recommendation方法做了简要探讨：
+- 为此，本工作提出了***learning-to-generate***范式，核心思想是基于历史交互序列描述底层数据生成分布，直接生成表示用户偏好的oracle item，并推断出与oracle最匹配的真实item（p.s. 也就是说生成范式能够充分探索item space，并以历史交互作guidance，从而在item space中找到用户最偏好的oracle item）
+- 对于所提出的***learning-to-generate***范式，本文作者对已有的diffusion for recommendation方法做了简要探讨：
 
   > To our knowledge, recent studies have explored integrating diffusion models into sequential recommendation. However, these approaches still adhere to the learning-to-classify paradigm, inevitably requiring negative sampling during training. For instance, Li et al. and Du et al. apply softmax cross-entropy loss on the predicted logits of candidates, treating all non-target items as negative samples.
   > In contrast, our proposed DreamRec reshapes sequential recommendation as a learning-to-generate task. Specifically, DreamRec directly generates the oracle item tailored to user behavior sequence, transcending limitations of the concrete items in the candidate set and encouraging exploration of the underlying data distribution without the need of negative sampling.
@@ -312,16 +312,16 @@ reverse阶段的关键在于设计恰当的方法预测原始embedding，DiffuRe
 
 - Forward
 
-将target item映射为embedding $e_n^0$，随后类似DDPM进行加噪，直到$e_n^T$
+将target item映射为embedding $e\_n^0$，随后类似DDPM进行加噪，直到 $e\_n^T$
 
 - Reverse
 
-1. 将历史交互序列$e_{1:n-1}=[e_1,e_2,\cdots,e_{n-1}]$送入transformer encoder获得编码后的交互序列，即$c_{n-1}=\text{TransformerEncoder}(e_{1:n-1})$
-2. 将$c_{1:n-1}$作为guidance，利用classifier-free guidance方式训练，损失函数为
+1. 将历史交互序列 $e\_{1:n-1}=[e\_1,e\_2,\cdots,e\_{n-1}]$送入transformer encoder获得编码后的交互序列，即 $c\_{n-1}=\text{TransformerEncoder}(e\_{1:n-1})$
+2. 将 $c\_{1:n-1}$作为guidance，利用classifier-free guidance方式训练，损失函数为
 
 ![image.png](/images/blogs/diffusion for sr/image%2016.png)
 
-其中会以一定的概率将$c_{1:n-1}$置为dummy token$\Phi$来训练无条件diffusion model
+其中会以一定的概率将 $c\_{1:n-1}$置为dummy token$\Phi$来训练无条件diffusion model
 
 - Inference
 
@@ -329,7 +329,7 @@ reverse阶段的关键在于设计恰当的方法预测原始embedding，DiffuRe
 
 - Retrieval of Recommendation List
 
-在生成 oracle item后，后续步骤为获取针对特定用户量身定制的recommendation list。本工作从候选集中选取$K$个与oracle item内积最大的item来实现。从概念上讲，DreamRec 超越了有限候选集的范围，在追求 oracle item时渗透到整个item space中。
+在生成 oracle item后，后续步骤为获取针对特定用户量身定制的recommendation list。本工作从候选集中选取 $K$个与oracle item内积最大的item来实现。从概念上讲，DreamRec 超越了有限候选集的范围，在追求 oracle item时渗透到整个item space中。
 
 ### 3.4. DimeRec
 
@@ -358,10 +358,10 @@ reverse阶段的关键在于设计恰当的方法预测原始embedding，DiffuRe
 
   - Rule-based GEM
 
-    这种方式是parameter-free的，通常通过设计合理的规则来提取guidance。在本工作中，一个基本的方式是将历史序列$\mathcal{S}^u\in \mathbb{R}^{N}$裁剪至更小的size $K$，然后encode到连续空间作为guidance，即$g^u=\mathcal{F}(\mathcal{S}^u[-K:])$
+    这种方式是parameter-free的，通常通过设计合理的规则来提取guidance。在本工作中，一个基本的方式是将历史序列 $\mathcal{S}^u\in \mathbb{R}^{N}$裁剪至更小的size $K$，然后encode到连续空间作为guidance，即 $g^u=\mathcal{F}(\mathcal{S}^u[-K:])$
   - Model-based GEM
 
-    设计了一个learnable的attentive matrix $A\in \mathcal{R}^{N\times K}$，通过激活函数为$tanh$的两层 mlp 来实现，提取的guidance为 $g^u=A^T(\mathcal{F}(\mathcal{S}^u)+\mathcal{P})$，$\mathcal{P}$为position embedding（区别于 DreamRec，这里压缩到更低维的 interest space 中）
+    设计了一个learnable的attentive matrix $A\in \mathcal{R}^{N\times K}$，通过激活函数为$tanh$的两层 mlp 来实现，提取的guidance为 $g^u=A^T(\mathcal{F}(\mathcal{S}^u)+\mathcal{P})$， $\mathcal{P}$为position embedding（区别于 DreamRec，这里压缩到更低维的 interest space 中）
 - Diffusion Aggregation Module（DAM）
 
   - 本工作使用当前target item embedding，guidance和step embedding预测原始embedding
@@ -372,7 +372,7 @@ reverse阶段的关键在于设计恰当的方法预测原始embedding，DiffuRe
   - 为此提出将向量限制在一个超球面中以保持norm不变，但由此带来的是在黎曼流形中的diffusion modeling与欧氏空间中diffusion modeling不一致的问题。不过geodesic random walk理论告诉我们，对于球面流形，如果测地线随机游走的步骤较小且各向同性分布（即均匀分布在所有方向上），则此类游走端点的分布可以在游走均值点处逼近切线空间中的高斯噪声。因此可以直接利用DDPM的结论进行反向过程，而不失有效性，唯一需要做的事情是**将生成的向量映射到球面空间**
 - Loss Function
 
-  - 为促进item embedding的学习，设计了对比学习损失来增强item embedding的语义信息，$e_a$为target item embedding：
+  - 为促进item embedding的学习，设计了对比学习损失来增强item embedding的语义信息， $e\_a$为target item embedding：
 
   ![image.png](/images/blogs/diffusion for sr/image%2020.png)
 
@@ -382,7 +382,7 @@ reverse阶段的关键在于设计恰当的方法预测原始embedding，DiffuRe
 
   ![image.png](/images/blogs/diffusion for sr/image%2022.png)
 
-  - total loss：$\mathcal{L}=\mathcal{L}_{gem}+\lambda \mathcal{L}_{recon}+\mu \mathcal{L}_{ssm}$
+  - total loss：$\mathcal{L}=\mathcal{L}\_{gem}+\lambda \mathcal{L}\_{recon}+\mu \mathcal{L}\_{ssm}$
 - Algorithm
 
 ![image.png](/images/blogs/diffusion for sr/image%2023.png)
@@ -413,11 +413,11 @@ reverse阶段的关键在于设计恰当的方法预测原始embedding，DiffuRe
 
 - 借助SVQ的guidance提取
 
-  对于交互序列$s=[x_1,x_2,\cdots,x_{L-1}]$，首先得到它的embedding $\mathbf{s}={\mathbf{x}_1,\mathbf{x}_2,\cdots,\mathbf{x}_{L-1}}$，设定一个语义codebook $\mathbf{C}=\{\mathbf{c}_m\}_{m=1}^M$，其中 $\mathbf{c}_m\in \mathbb{R}^{(L-1)\times D}$，可以理解成每个item embedding都有 $M$ 个VQ。对于每一个item，直接去codebook里找最相似的VQ并替换的方式会使得loss对特征并不可导，因此采用的是GumbelSoftmax技巧，将item embedding利用 mlp $f_{\phi}$ 从 $\mathbb{R}^D$ 映射到$\mathbb{R}^{M}$，随后
+  对于交互序列 $s=[x\_1,x\_2,\cdots,x\_{L-1}]$，首先得到它的embedding $\mathbf{s}={\mathbf{x}\_1,\mathbf{x}\_2,\cdots,\mathbf{x}\_{L-1}}$，设定一个语义codebook $\mathbf{C}=\\{\mathbf{c}\_m\\}\_{m=1}^M$，其中 $\mathbf{c}\_m\in \mathbb{R}^{(L-1)\times D}$，可以理解成每个item embedding都有 $M$ 个VQ。对于每一个item，直接去codebook里找最相似的VQ并替换的方式会使得loss对特征并不可导，因此采用的是GumbelSoftmax技巧，将item embedding利用 mlp $f\_{\phi}$ 从 $\mathbb{R}^D$ 映射到 $\mathbb{R}^{M}$，随后
 
   ![image.png](/images/blogs/diffusion for sr/image%2027.png)
 
-  $g_m$中值最大的index即为对应VQ的index；在得到 $\mathbf{s}$ 的 quantized code $\mathbf{s}_q$后，将其融入到原始embedding，即 $\tilde{\mathbf{s}}=\mathbf{s}+\lambda_q \mathbf{s}_q$
+  $g\_m$中值最大的index即为对应VQ的index；在得到 $\mathbf{s}$ 的 quantized code $\mathbf{s}\_q$后，将其融入到原始embedding，即  $\tilde{\mathbf{s}}=\mathbf{s}+\lambda\_q \mathbf{s}\_q$
 
   <aside>
     💡
@@ -440,7 +440,7 @@ reverse阶段的关键在于设计恰当的方法预测原始embedding，DiffuRe
   ![image.png](/images/blogs/diffusion for sr/image%2030.png)
 - 损失函数
 
-  $\mathcal{L}=\mathcal{L}_r+\lambda_c \mathcal{L}_c$
+  $\mathcal{L}=\mathcal{L}\_r+\lambda\_c \mathcal{L}\_c$
 - Inference
 
   ![image.png](/images/blogs/diffusion for sr/image%2031.png)
