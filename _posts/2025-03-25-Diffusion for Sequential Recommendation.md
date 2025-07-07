@@ -1,4 +1,4 @@
-此blog为记录diffusion model做推荐系统尤其是序列推荐的一系列论文的阅读笔记
+This blog serves as a reading note for a series of papers on applying diffusion models to recommendation systems, especially sequential recommendation.
 
 # Diffusion for Recommendation
 
