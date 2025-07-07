@@ -1,4 +1,4 @@
-# Diffusion for Sequential Recommendation
+此blog为记录diffusion model做推荐系统尤其是序列推荐的一系列论文的阅读笔记
 
 # Diffusion for Recommendation
 
@@ -10,7 +10,7 @@
 
 ### 1.1. Setting
 
-给定user $u$和他在item set $\mathcal{I}$上的交互历史$\mathbf{x}_u=\{x_u^1,x_u^2,\cdots,x_u^{|\mathcal{I}|}\}$ ，其中$x_u^i=0\ \text{or}\ 1$表示user是否与第$i$个item进行交互，目的是推断出user与所有item的交互概率。
+给定user $u$和他在item set $\mathcal{I}$上的交互历史$\mathbf{x}_u=\{x_u^1,x_u^2,\cdots,x_u^{\mid \mathcal{I}\mid}\}$ ，其中$x_u^i=0\ \text{or}\ 1$表示user是否与第$i$个item进行交互，目的是推断出user与所有item的交互概率。
 
 ### 1.2. DiffRec
 
@@ -62,7 +62,7 @@
 
 user的perference会随时间变化，近期的交互能更准确表达用户的perference，因此为最近交互的数据分配更大的权重
 
-![image.png](src/image%203.png)
+![image.png](/images/blogs/diffusion for sr/image%203.png)
 
 ## 2. Representation **Perspective**
 
@@ -91,11 +91,11 @@ user的perference会随时间变化，近期的交互能更准确表达用户的
 
 - Framework
 
-![image.png](src/image%204.png)
+![image.png](/images/blogs/diffusion for sr/image%204.png)
 
 - Training
 
-![image.png](src/image%205.png)
+![image.png](/images/blogs/diffusion for sr/image%205.png)
 
 1. 涉及diffusion部分类似 DDPM，只需注意：
    1. DDRM对pre-trained user, item embedding进行forward和reverse；
@@ -104,7 +104,7 @@ user的perference会随时间变化，近期的交互能更准确表达用户的
 
 - inference
 
-![image.png](src/image%206.png)
+![image.png](/images/blogs/diffusion for sr/image%206.png)
 
 1. inference阶段，利用user历史的平均item embedding作为start point，reverse阶段依然用预测均值替换
 2. 在生成 ideal item embedding后，利用rounding function $s(e,e_i)$选出top-k候选item进行推荐
@@ -141,7 +141,7 @@ item embedding的shape？
   - item-level augmentation：此类方法能处理数据稀疏和长尾问题，它为每个用户交互序列生成pseudo pre-order items。但现存方法关注如何有效地使用增强数据集，而忽略了增强数据本身的质量与生成数据与原始数据的shift。
   - diffusion model 具备生成高质量数据的能力，且作者认为借助diffusion一次生成能减缓生成的sequence与原始sequence之间的shift，因而提议借助扩散模型解决问题。
 
-![image.png](src/image%207.png)
+![image.png](/images/blogs/diffusion for sr/image%207.png)
 
 - 关键挑战：
   - diffusion model 最初为生成图像而设计，在二维连续空间执行forward和reverse，但是user的交互历史处于一维离散空间，其中存在gap
@@ -152,7 +152,7 @@ item embedding的shape？
 
 2.1.2. *Diffu*sion *A*ugmentation for *S*equential *R*ecommendation（DiffuASR）
 
-![image.png](src/image%208.png)
+![image.png](/images/blogs/diffusion for sr/image%208.png)
 
 - Forward Process
 
@@ -205,7 +205,7 @@ item embedding的shape？
 
 3.1.2. Sequential Recommendation with Diffusion Models (DiffRec2)
 
-![image.png](src/image%209.png)
+![image.png](/images/blogs/diffusion for sr/image%209.png)
 
 - Forward Process
 
@@ -221,11 +221,11 @@ item embedding的shape？
 
 - Objective
 
-![image.png](src/image%2010.png)
+![image.png](/images/blogs/diffusion for sr/image%2010.png)
 
 - Inference
 
-![image.png](src/image%2011.png)
+![image.png](/images/blogs/diffusion for sr/image%2011.png)
 
 1. 做inference时，待生成的item取一个额外的占位符 [unk]
 2. 论文后续设计的efficient inference其实是取多个随机种子，然后在reverse阶段一步denoise，对不同种子下的结果做average，一步denoise虽然确实快了，但是效果是比较存疑的
@@ -248,7 +248,7 @@ item embedding的shape？
 
 3.2.2. DiffuRec
 
-![image.png](src/image%2012.png)
+![image.png](/images/blogs/diffusion for sr/image%2012.png)
 
 - Forward Process
 
@@ -277,13 +277,13 @@ reverse阶段的关键在于设计恰当的方法预测原始embedding，DiffuRe
 
 1. 不同于一般的DDPM中用MSE进行约束，DiffuRec利用cross-entropy进行约束：
 
-![image.png](src/image%2013.png)
+![image.png](/images/blogs/diffusion for sr/image%2013.png)
 
 这基于两点理由：1）item embedding在latent space还是离散的；2）在序列推荐领域，计算两个向量的内积取表示相关性更加普遍
 
 - Inference
 
-![image.png](src/image%2014.png)
+![image.png](/images/blogs/diffusion for sr/image%2014.png)
 
 ### 3.3. DreamRec
 
@@ -293,7 +293,7 @@ reverse阶段的关键在于设计恰当的方法预测原始embedding，DiffuRe
 
 3.3.1. Motivation
 
-![image.png](src/image%2015.png)
+![image.png](/images/blogs/diffusion for sr/image%2015.png)
 
 - 过去大多序列推荐的工作都可以归类为**“*learning-to-classify*”**范式，即给定一个positive item，推荐模型执行负采样以添加negative item，并根据user的历史交互序列学习去判断user是否更喜欢它们。这种范式存在以下两点问题：
 
@@ -319,13 +319,13 @@ reverse阶段的关键在于设计恰当的方法预测原始embedding，DiffuRe
 1. 将历史交互序列$e_{1:n-1}=[e_1,e_2,\cdots,e_{n-1}]$送入transformer encoder获得编码后的交互序列，即$c_{n-1}=\text{TransformerEncoder}(e_{1:n-1})$
 2. 将$c_{1:n-1}$作为guidance，利用classifier-free guidance方式训练，损失函数为
 
-![image.png](src/image%2016.png)
+![image.png](/images/blogs/diffusion for sr/image%2016.png)
 
 其中会以一定的概率将$c_{1:n-1}$置为dummy token$\Phi$来训练无条件diffusion model
 
 - Inference
 
-![image.png](src/image%2017.png)
+![image.png](/images/blogs/diffusion for sr/image%2017.png)
 
 - Retrieval of Recommendation List
 
@@ -352,7 +352,7 @@ reverse阶段的关键在于设计恰当的方法预测原始embedding，DiffuRe
 
 3.4.2. *Di*ffusion with *M*ulti-interest *E*nhanced *Rec*ommender（DimeRec）
 
-![image.png](src/image%2018.png)
+![image.png](/images/blogs/diffusion for sr/image%2018.png)
 
 - Guidance Extraction Module（GEM）
 
@@ -367,27 +367,27 @@ reverse阶段的关键在于设计恰当的方法预测原始embedding，DiffuRe
   - 本工作使用当前target item embedding，guidance和step embedding预测原始embedding
   - 在此处探讨了推荐系统分类loss与diffusion重建loss优化方向不一的问题，即diffusion重建的mse loss会减小向量的norm，而增大内积则可能使得向量norm增大。
 
-  ![image.png](src/image%2019.png)
+  ![image.png](/images/blogs/diffusion for sr/image%2019.png)
 
   - 为此提出将向量限制在一个超球面中以保持norm不变，但由此带来的是在黎曼流形中的diffusion modeling与欧氏空间中diffusion modeling不一致的问题。不过geodesic random walk理论告诉我们，对于球面流形，如果测地线随机游走的步骤较小且各向同性分布（即均匀分布在所有方向上），则此类游走端点的分布可以在游走均值点处逼近切线空间中的高斯噪声。因此可以直接利用DDPM的结论进行反向过程，而不失有效性，唯一需要做的事情是**将生成的向量映射到球面空间**
 - Loss Function
 
   - 为促进item embedding的学习，设计了对比学习损失来增强item embedding的语义信息，$e_a$为target item embedding：
 
-  ![image.png](src/image%2020.png)
+  ![image.png](/images/blogs/diffusion for sr/image%2020.png)
 
   - 重建损失与分类损失：
 
-  ![image.png](src/image%2021.png)
+  ![image.png](/images/blogs/diffusion for sr/image%2021.png)
 
-  ![image.png](src/image%2022.png)
+  ![image.png](/images/blogs/diffusion for sr/image%2022.png)
 
   - total loss：$\mathcal{L}=\mathcal{L}_{gem}+\lambda \mathcal{L}_{recon}+\mu \mathcal{L}_{ssm}$
 - Algorithm
 
-![image.png](src/image%2023.png)
+![image.png](/images/blogs/diffusion for sr/image%2023.png)
 
-![image.png](src/image%2024.png)
+![image.png](/images/blogs/diffusion for sr/image%2024.png)
 
 ### 3.5. DiQDiff
 
@@ -401,7 +401,7 @@ reverse阶段的关键在于设计恰当的方法预测原始embedding，DiffuRe
   - 历史交互序列是**heterogeneous & noise**的：交互序列在长度与内容上非常异质，低活用户的交互序列非常稀疏，将其作为guidance不能提供足够的信息；高活用户的长交互序列中可能存在很多的噪声（因为交互行为是随机的）
   - **生成过程存在偏差**：尽管diffusion model能为user推荐个性化的item，如果训练数据分布是unbalance的，被popular item占据的概率密度很高，那么训练完全的diffusion model采样时就倾向于生成popular item，这可能损害了推荐的个性化
 
-![image.png](src/image%2025.png)
+![image.png](/images/blogs/diffusion for sr/image%2025.png)
 
 - 解决方案：
   - 针对问题一，**其本质上是要提取鲁棒的guidance**，本工作提出学习semantic vector quantization（SVQ）并融入交互序列来丰富guidance以更好理解用户兴趣
@@ -409,13 +409,13 @@ reverse阶段的关键在于设计恰当的方法预测原始embedding，DiffuRe
 
 3.5.2. *Di*stinguished *Q*uantized Guidance for *Diff*usion-based Sequence Recommendation （DiQDiff）
 
-![image.png](src/image%2026.png)
+![image.png](/images/blogs/diffusion for sr/image%2026.png)
 
 - 借助SVQ的guidance提取
 
   对于交互序列$s=[x_1,x_2,\cdots,x_{L-1}]$，首先得到它的embedding $\mathbf{s}={\mathbf{x}_1,\mathbf{x}_2,\cdots,\mathbf{x}_{L-1}}$，设定一个语义codebook $\mathbf{C}=\{\mathbf{c}_m\}_{m=1}^M$，其中 $\mathbf{c}_m\in \mathbb{R}^{(L-1)\times D}$，可以理解成每个item embedding都有 $M$ 个VQ。对于每一个item，直接去codebook里找最相似的VQ并替换的方式会使得loss对特征并不可导，因此采用的是GumbelSoftmax技巧，将item embedding利用 mlp $f_{\phi}$ 从 $\mathbb{R}^D$ 映射到$\mathbb{R}^{M}$，随后
 
-  ![image.png](src/image%2027.png)
+  ![image.png](/images/blogs/diffusion for sr/image%2027.png)
 
   $g_m$中值最大的index即为对应VQ的index；在得到 $\mathbf{s}$ 的 quantized code $\mathbf{s}_q$后，将其融入到原始embedding，即 $\tilde{\mathbf{s}}=\mathbf{s}+\lambda_q \mathbf{s}_q$
 
@@ -428,23 +428,21 @@ reverse阶段的关键在于设计恰当的方法预测原始embedding，DiffuRe
 
   codebook $\mathbf{C}$ 的更新由下面给出：
 
-  ![image.png](src/image%2028.png)
+  ![image.png](/images/blogs/diffusion for sr/image%2028.png)
 - 借助CDM的差异化生成
 
   为了使得diffusion model能够进行差异化生成，对不同sequence denoise生成的 item representation进行余弦相似度最大化：
 
-  ![image.png](src/image%2029.png)
+  ![image.png](/images/blogs/diffusion for sr/image%2029.png)
 
   diffusion model损失函数为：
 
-  ![image.png](src/image%2030.png)
+  ![image.png](/images/blogs/diffusion for sr/image%2030.png)
 - 损失函数
 
   $\mathcal{L}=\mathcal{L}_r+\lambda_c \mathcal{L}_c$
 - Inference
 
-  ![image.png](src/image%2031.png)
-
-  inference阶段codebook也更新？
+  ![image.png](/images/blogs/diffusion for sr/image%2031.png)
 
 > 可以发现在 sequence as diffusion guidance 范式中，最开始探索的是如何将历史交互序列信息作为guidance进行denoise，发展出了直接condition和借助transformer encoder融合两种方法。近期的工作开始关注历史交互序列本身的问题，并探索如何获得更好的guidance
