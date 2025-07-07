@@ -321,7 +321,7 @@ reverse阶段的关键在于设计恰当的方法预测原始embedding，DiffuRe
 
 ![image.png](/images/blogs/diffusion for sr/image%2016.png)
 
-其中会以一定的概率将 $c\_{1:n-1}$置为dummy token$\Phi$来训练无条件diffusion model
+其中会以一定的概率将 $c\_{1:n-1}$置为dummy token $\Phi$来训练无条件diffusion model
 
 - Inference
 
@@ -382,7 +382,7 @@ reverse阶段的关键在于设计恰当的方法预测原始embedding，DiffuRe
 
   ![image.png](/images/blogs/diffusion for sr/image%2022.png)
 
-  - total loss：$\mathcal{L}=\mathcal{L}\_{gem}+\lambda \mathcal{L}\_{recon}+\mu \mathcal{L}\_{ssm}$
+  - total loss： $\mathcal{L}=\mathcal{L}\_{gem}+\lambda \mathcal{L}\_{recon}+\mu \mathcal{L}\_{ssm}$
 - Algorithm
 
 ![image.png](/images/blogs/diffusion for sr/image%2023.png)
