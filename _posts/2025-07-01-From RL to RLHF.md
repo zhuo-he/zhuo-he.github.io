@@ -79,11 +79,11 @@ $$H_t=o_1,a_1,r_1,...,o_t,a_t,r_t.$$
 
 价值评估了智能体在某一时刻 t 的状态 $$s_t$$ 下的期望长期累积奖励，由于我们更关心近期的奖励，因此引入一个**折扣因子** $$\gamma$$，价值函数定义为：
 
-$$V_\pi(s)=\mathbb{E}_\pi[G_t\mid s_t=s]=\mathbb{E}_\pi[\sum_{k=0}^{\infin} \gamma^k r_{t+k+1}\mid s_t=s].$$
+$$V_\pi(s)=\mathbb{E}_\pi[G_t\mid s_t=s]=\mathbb{E}_\pi[\sum_{k=0}^{∞} \gamma^k r_{t+k+1}\mid s_t=s].$$
 
-其中 $$G_t=\sum_{k=0}^{\infin} \gamma^k r_{t+k+1}$$ 表示未来某一决策链下的长期累积奖励。 $$V_\pi(s)$$ 被称为状态价值函数，还有一种动作价值函数 $$Q_\pi(s,a)$$，相比 $$V_\pi(s)$$，其未来可以取得的累积奖励期望还取决于动作：
+其中 $$G_t=\sum_{k=0}^{∞} \gamma^k r_{t+k+1}$$ 表示未来某一决策链下的长期累积奖励。 $$V_\pi(s)$$ 被称为状态价值函数，还有一种动作价值函数 $$Q_\pi(s,a)$$，相比 $$V_\pi(s)$$，其未来可以取得的累积奖励期望还取决于动作：
 
-$$Q_\pi(s,a)=\mathbb{E}_\pi[G_t\mid s_t=s,a_t=a]=\mathbb{E}_\pi[\sum_{k=0}^{\infin} \gamma^k r_{t+k+1}\mid s_t=s,a_t=a].$$
+$$Q_\pi(s,a)=\mathbb{E}_\pi[G_t\mid s_t=s,a_t=a]=\mathbb{E}_\pi[\sum_{k=0}^{∞} \gamma^k r_{t+k+1}\mid s_t=s,a_t=a].$$
 
 根据智能体学习的事物不同，可以把智能体进行归类：
 
