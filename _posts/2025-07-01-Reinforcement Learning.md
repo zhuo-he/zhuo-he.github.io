@@ -6,7 +6,7 @@ tags:
   - cool posts
 ---
 
-This blog is written to record the study of RLHF in LLM, starting from reinforcement learning.
+In light of the widespread adoption of RLHF in large language models (LLMs), this blog is intended to document my study of reinforcement learning—the theoretical foundation of RLHF.
 
 # 1. 强化学习基础
 
@@ -204,4 +204,54 @@ $$
 
 简单总结一下 MRP 与 MDP：MRP 相较于经典马尔可夫过程多了奖励，MDP 相较于 MRP 多了决策过程。由于多了一个决策，多了一个动作，因此状态转移也多了一个条件，即执行一个动作，导致未来状态的变化，其不仅依赖于当前的状态，也依赖于在当前状态下智能体采取的动作决定的状态变化。对于价值函数，它也多了一个条件，多了一个当前的动作，即当前状态以及采取的动作会决定当前可能得到的奖励的多少。此外，MDP 和 MRP 是可以相互转化的。
 
-to be continued
+最后我们介绍以下**备份图（backup）**，它非常清晰直观地展现了 MDP 中 $$Q(s_t,a_t)$$ 与 $$V_\pi(s_t)$$ 之间的转化关系。
+
+![img](rlhf/2-1.png)
+
+上图展示了 3 种不同的备份图，其中空心节点仅表示状态 $$s$$，实心节点表示状态与动作的二元组 $$(s,a)$$。每个节点都对应一个价值，即空实心节点分别对应价值 $$V_\pi(s)$$ 和 $$Q(s,a)$$。空心节点向实心节点转移表明智能体依据策略 $$\pi(a\mid s)$$ 选择了一个动作，实心节点向下一个空心节点转移表明发生了状态转移 $$p(s^{\prime}\mid s,a)$$。在这个备份图中可以清晰看出，MDP 是先有智能体选择动作，再由智能体当前状态和动作共同决定下一时刻状态，而 MRP 直接发生状态转移，而与智能体选择的动作无关。
+
+对于上图 (a)，要建立起 $$V_\pi(s)$$ 与 $$V_\pi(s^{\prime})$$ 之间的联系，首先将价值 $$V_\pi(s^{\prime})$$ 对状态 $$s^{\prime}$$ 加和，向上备份一层，在动作状态 $$(s,a)$$ 层再加上即时价值 $$R(s,a)$$ 并对动作 $$a$$ 进行加和，将价值再向上备份一层，得到：
+
+$$
+V_\pi(s)=\underbrace{\sum_a\pi(a\mid s)[\underbrace{R(s,a)+\gamma\sum_{s^{\prime}} p(s^{\prime}\mid s,a)V_\pi(s^{\prime})}_{第一层}]}_{第二层}
+$$
+
+![img](rlhf/2-2.png)
+
+类似地，可以由上面备份图得到 $$Q(s,a)$$ 与 $$Q(s^{\prime},a^{\prime})$$ 之间的联系：
+
+$$
+Q(s,a)=\underbrace{R(s,a)+\sum_{s^{\prime}}p(s^{\prime}\mid s,a)\gamma\underbrace{\sum_{a^{\prime}}\pi(a^{\prime}\mid s^{\prime})Q(s^{\prime},a^{\prime}}_{第一层})}_{第二层}
+$$
+
+注：$$s^{\prime}\rightarrow (s,a)$$ 要加上即时奖励 $$R(s,a)$$，$$(s,a)\rightarrow s$$ 不需要加即时奖励。
+
+## 2.3. 马尔可夫决策过程的预测与控制
+
+**预测（prediction）**和**控制（control）**是马尔可夫决策过程里面的核心问题。
+
+预测（评估一个给定的策略）的输入是马尔可夫决策过程 $$<S,A,P,R,\gamma>$$ 与策略 $$\pi$$，输出是价值函数 $$V_\pi$$。预测是指**给定一个马尔可夫决策过程以及一个策略 $$\pi$$，计算它的价值函数**，也就是计算每个状态的价值。
+
+控制（搜索最佳策略）的输入是马尔可夫决策过程 $$<S,A,P,R,\gamma>$$ ，输出是最优价值函数 $$V^*$$ 与最佳策略 $$\pi^*$$。
+
+### 2.3.1. 策略评估
+
+策略评估就是给定马尔可夫决策过程和策略，评估我们可以获得多少价值，即对于当前策略，我们可以得到多大的价值，它属于预测的范畴。相邻两个时间 t 和 t+1 的迭代通过**贝尔曼期望备份**执行：
+
+$$
+V_\pi^{t+1}(s)=\sum_a\pi(a\mid s)[R(s,a)+\gamma\sum_{s^{\prime}} p(s^{\prime}\mid s,a)V_\pi^{t}(s^{\prime})]
+$$
+
+接下来介绍控制，控制是指在**给定马尔可夫决策过程的条件下，寻找最优策略从而得到最优价值函数的方法**。对于价值函数 $$V_\pi(s)$$，最优价值函数 $$V^*(s)$$ 定义为在一种策略下使得每个状态下的状态价值最大的函数，即
+
+$$
+V^*(s)=\max_\pi V_\pi(s)
+$$
+
+使得每个状态下的状态价值函数 $$V_\pi(s)$$ 都最大的策略即为最优策略，即
+
+$$
+\pi^*(s)=\text{argmax}_{\pi} V_\pi(s)
+$$
+
+我们可以通过策略迭代和价值迭代来解决马尔可夫决策过程的控制问题。
