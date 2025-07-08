@@ -204,7 +204,7 @@ $$
 
 简单总结一下 MRP 与 MDP：MRP 相较于经典马尔可夫过程多了奖励，MDP 相较于 MRP 多了决策过程。由于多了一个决策，多了一个动作，因此状态转移也多了一个条件，即执行一个动作，导致未来状态的变化，其不仅依赖于当前的状态，也依赖于在当前状态下智能体采取的动作决定的状态变化。对于价值函数，它也多了一个条件，多了一个当前的动作，即当前状态以及采取的动作会决定当前可能得到的奖励的多少。此外，MDP 和 MRP 是可以相互转化的。
 
-最后我们介绍以下**备份图（backup）**，它非常清晰直观地展现了 MDP 中 $$Q(s_t,a_t)$$ 与 $$V_\pi(s_t)$$ 之间的转化关系。
+最后我们介绍下**备份图（backup）**，它非常清晰直观地展现了 MDP 中 $$Q(s_t,a_t)$$ 与 $$V_\pi(s_t)$$ 之间的转化关系。
 
 ![img](/images/blogs/rlhf/2-1.png)
 
@@ -343,6 +343,103 @@ $$
 \pi^*=\text{argmax}_{\pi}(R_\pi+\gamma P_\pi V_\pi^*)
 $$
 
-[可以证明，$$\pi^*$$ 就是最优策略，且 $$V_{\pi}^*$$ 是最优状态价值函数](https://github.com/MathFoundationRL/Book-Mathematical-Foundation-of-Reinforcement-Learning)。这个 $$\pi^*$$ 就是前面说的，选择使 Q 函数最大的动作的、确定性的、贪婪的策略。
+[可以证明，$$\pi^*$$ 就是最优策略，且 $$V_{\pi}^*$$ 是最优状态价值函数](https://github.com/MathFoundationRL/Book-Mathematical-Foundation-of-Reinforcement-Learning)。这个 $$\pi^*$$ 就是前面说的，选择使 Q 函数最大的动作的、确定性的、贪婪的策略。此时，
 
-to be continued
+$$
+V_\pi^*=R_\pi + \gamma P_\pi V_\pi^*
+$$
+
+因此可以说，贝尔曼最优方程是贝尔曼方程的一种特例。
+
+介绍完贝尔曼最优方程，下面介绍价值迭代与策略迭代---两种利用贝尔曼最优方程求解最优策略的 **value-based 方法**。
+
+### 2.3.3. 价值迭代
+
+价值迭代（Value Iteration） 就是利用迭代式
+
+$$
+V_\pi^{k+1}=\max_\pi (R_\pi+\gamma P_\pi V_\pi^k)
+$$
+
+求解最优策略的方法，它分为两个步骤：
+
+**Step 1. 策略更新（Policy Update）** 
+
+$$
+\begin{aligned}
+\pi^{k+1}(a\mid s)&=\text{argmax}_\pi \sum_a\pi(a\mid s)[R(s,a)+\gamma\sum_{s^{\prime}} p(s^{\prime}\mid s,a)V_\pi^k(s^{\prime})]\\
+&=\text{argmax}_{\pi} \sum_a\pi(a\mid s)Q^k(s,a)
+\end{aligned}
+$$
+
+从前面的分析可以得知
+
+$$
+\pi^{k+1}(a\mid s)=\left\{
+\begin{aligned}
+1,\ a=a^*\\
+0,\ a\neq a^*
+\end{aligned}
+\right.
+$$
+
+其中 $$a^*=\text{argmax}_a Q^k(s,a)$$ 。
+
+**Step 2. 价值更新（Value Update）** 
+
+由于 $$\pi^{k+1}$$ 是贪婪的，所以
+
+$$
+V^{k+1}(s)=\max_a Q^k(s,a)
+$$
+
+依次逐步向后迭代，直至 $$V^k(s)$$ 收敛为止，通过确定性贪婪选取最优策略。
+
+**算法流程：** 
+
+$$
+V^k(s)\rightarrow Q^k(s,a)\rightarrow \text{greedy policy}\ \pi^k(a\mid s)\rightarrow V^{k+1}(s)=\max_a Q^k(s,a)\rightarrow ...
+$$
+
+### 2.3.4. 策略迭代
+
+ 给定一个随机初始化的策略 $$\pi_0$$，
+
+**Step 1. 策略评估（Policy Evaluation）** 
+
+由策略 $$\pi_k$$ 求出状态价值 $$V^k$$ 
+
+- 闭式解
+
+$$
+V_{\pi_k}=(I-\gamma P_{\pi_k})^{-1} R_{\pi_k}
+$$
+
+- 迭代解（更常用）
+
+$$
+V_{\pi_k}^{(j+1)}=R_{\pi_k}+\gamma P_{\pi_k} V_{\pi_k}^{(j)}
+$$
+
+**Step 2. 策略提升（Policy Improvement）** 
+
+$$
+\pi_{k+1}=\text{argmax}_{\pi} (R_\pi + \gamma P_\pi V_\pi^{(n)})
+$$
+
+其中 $$V^{(n)}_\pi$$ 为 $$n$$ 次内部迭代后得到的价值函数，类似前面每次迭代选取的最优策略利用贪婪得到。可以证明，$$V_{\pi_{k+1}}\ge V_{\pi_k}$$ ，即**策略每次更新都在不断改进**，并最终会收敛到最优解 $$V^*_{\pi}$$ 。
+
+**算法流程：** 
+
+$$
+\pi_0 \rightarrow V_{\pi_0} \rightarrow \pi_1 \rightarrow ...
+$$
+
+价值迭代和策略迭代都是通过优化值函数来间接推导最优策略，而非直接优化策略本身，属于 value-based 方法。
+
+至此，马尔可夫决策过程的内容大体完毕，这一章主要介绍了马尔可夫奖励过程、马尔可夫决策过程、贝尔曼方程以及两种简单 value-based 方法：价值迭代与策略迭代。
+
+
+*Reference*:
+- [磨菇书 EasyRL](https://datawhalechina.github.io/easy-rl/#/)
+- [强化学习的数学原理](https://github.com/MathFoundationRL/Book-Mathematical-Foundation-of-Reinforcement-Learning)
