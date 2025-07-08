@@ -1,12 +1,12 @@
 ---
-title: 'Reinforcement Learning (1)'
+title: 'From RL to RLHF (1)'
 date: 2025-07-01
-permalink: /posts/2025/07/Reinforcement Learning (1)/
+permalink: /posts/2025/07/From RL to RLHF (1)/
 tags:
   - cool posts
 ---
 
-In light of the widespread adoption of RLHF in large language models (LLMs), this blog is intended to document my study of reinforcement learning—the theoretical foundation of RLHF.
+In light of the widespread adoption of RLHF in large language models (LLMs), this blog is intended to document my study of RLHF, starting from reinforcement learning.
 
 # 1. 强化学习基础
 
@@ -242,6 +242,7 @@ $$
 V_\pi^{t+1}(s)=\sum_a\pi(a\mid s)[R(s,a)+\gamma\sum_{s^{\prime}} p(s^{\prime}\mid s,a)V_\pi^{t}(s^{\prime})]
 $$
 
+
 接下来介绍控制，控制是指在**给定马尔可夫决策过程的条件下，寻找最优策略从而得到最优价值函数的方法**。对于价值函数 $$V_\pi(s)$$，最优价值函数 $$V^*(s)$$ 定义为在一种策略下使得每个状态下的状态价值最大的函数，即
 
 $$
@@ -254,4 +255,94 @@ $$
 \pi^*(s)=\text{argmax}_{\pi} V_\pi(s)
 $$
 
-我们可以通过策略迭代和价值迭代来解决马尔可夫决策过程的控制问题。
+可以看出最优策略其实是非常理想的，因为它要求在任意状态下都有最大状态价值，那么这自然引出了一系列问题：最优策略是否存在？最优策略是否唯一？最优策略是随机的还是确定的？如何获得最优策略？这些问题可以通过研究**贝尔曼最优方程（Bellman Optimal Equation）**来回答。
+
+### 2.3.2. 贝尔曼最优方程
+
+下面给出贝尔曼最优方程：
+
+$$
+V^*(s)=\max_{\pi} V_\pi(s)
+$$
+
+将右式展开并改写：
+
+$$
+\begin{aligned}
+V_\pi(s)&=\max_\pi \sum_a\pi(a\mid s)[R(s,a)+\gamma\sum_{s^{\prime}} p(s^{\prime}\mid s,a)V_\pi(s^{\prime})]\\
+&=\max_\pi \sum_a\pi(a\mid s)Q(s,a)
+\end{aligned}
+$$
+
+其中智能体模型 $$R(s,a)$$ 与 $$p(s^{\prime}\mid s,a)$$ 已知，状态价值 $$V_\pi(s)$$ 未知。贝尔曼最优方程的向量形式写成
+
+$$
+V_\pi=\max_\pi (R_\pi+\gamma P_\pi V_\pi)
+$$
+
+对于每个状态，有 $$[R_\pi]_s=\sum_a \pi(a\mid s)R(s,a)$$，$$[P_\pi]_{s,s^{\prime}}=\sum_a\sum_{s^{\prime}} \pi(a\mid s)p(s^{\prime}\mid s,a)$$ 。
+
+我们分析一下式子 $$V_\pi(s)=\max_\pi \sum_a \pi(a\mid s)Q(s,a)$$ ：
+
+$$
+\begin{aligned}
+\sum_a \pi(a\mid s)Q(s,a)&\le \sum_a \pi(a\mid s) \max_{a^{\prime}}Q(s,a^{\prime})\\
+&\le \max_{a^{\prime}} Q(s,a^{\prime}) \sum_a \pi(a\mid s)\\
+&=\max_{a} Q(s,a^{\prime})
+\end{aligned}
+$$
+
+可以发现，对于每一个状态 $$s$$，我们取使得 Q 函数最大的动作，得到相应的 Q 函数的值是状态价值的一个上界，同时，我们取策略 $$\pi(a\mid s)$$ 为
+
+$$
+\pi(a\mid s)=\left\{
+\begin{aligned}
+1,\ a=a^{\prime}\\
+0,\ a\neq a^{\prime}
+\end{aligned}
+\right.
+$$
+
+就能使上界可达。因此 $$V_\pi(s)=\max_\pi \sum_a\pi(a\mid s)Q(s,a)\ge \max_{a} Q(s,a^{\prime})$$ 。总的来说，我们有
+
+$$
+V_\pi(s)=\max_\pi \sum_a\pi(a\mid s)Q(s,a)=\max_a Q(s,a)
+$$
+
+这一等式表明，**最优策略是确定性的、贪婪的，即选择使得 Q 函数 $$Q(s,a)$$ 最大的动作的策略**。
+
+目前对最优策略有了一个初步的感知，但是由于 Q 函数未知，它并没有提供获得最优策略的方法，并且关于其性质还有待进一步研究，下面进行详细讨论。
+
+我们将贝尔曼最优方程的右侧视作关于 $$V_\pi$$ 的函数，那么可以将方程改写为
+
+$$
+V_\pi=\max_\pi (R_\pi+\gamma P_\pi V_\pi)=f(V_\pi)
+$$
+
+这事实上是一个典型的不动点问题。与之相关的是**压缩映射定理**：
+
+> 对于任意具有形式 $$x=f(x)$$ 的方程，如果 $$f$$ 是一个压缩映射，那么：
+>
+> I. 存在性：存在一个不动点 $$x^*$$ 满足 $$x^*=f(x^*)$$。
+>
+> II. 唯一性：不动点 $$x^*$$ 是唯一的。
+>
+> III. 算法：考虑一个序列 $$\{x_k\}$$ ，其中 $$x_{k+1}=f(x_k)$$，那么当 $$k\rightarrow ∞$$ 时，$$x_k\rightarrow x^*$$。
+
+其中 $$f$$ 是一个压缩映射是指，$$\forall x_1,x_2 \in \mathbb{R}^d$$，$$\lVert f(x_1)-f(x_2) \rVert \le \gamma \lVert x_1-x_2 \rVert $$，$$\gamma\in (0,1)$$。
+
+[可以证明 $$f(V_\pi)$$ 中的 $$f$$ 是一个压缩映射](https://github.com/MathFoundationRL/Book-Mathematical-Foundation-of-Reinforcement-Learning)。这表明对于贝尔曼最优方程 $$V_\pi=\max_\pi (R_\pi+\gamma P_\pi V_\pi)=f(V_\pi)$$，总是存在且唯一存在一个不动点 $$V_\pi^*$$，并且能通过
+
+$$
+V_\pi^{k+1}=\max_\pi (R_\pi+\gamma P_\pi V_\pi^k)
+$$
+
+以迭代的形式解出，并且 $$V_\pi^k\rightarrow V_\pi^*$$，$$k\rightarrow ∞$$。在获得 $$V_\pi^*$$ 后，可以解出最优策略 $$\pi^*$$：
+
+$$
+\pi^*=\text{argmax}_{\pi}(R_\pi+\gamma P_\pi V_\pi^*)
+$$
+
+[可以证明，$$\pi^*$$ 就是最优策略，且 $$V_{\pi}^*$$ 是最优状态价值函数](https://github.com/MathFoundationRL/Book-Mathematical-Foundation-of-Reinforcement-Learning)。这个 $$\pi^*$$ 就是前面说的，选择使 Q 函数最大的动作的、确定性的、贪婪的策略。
+
+to be continued
