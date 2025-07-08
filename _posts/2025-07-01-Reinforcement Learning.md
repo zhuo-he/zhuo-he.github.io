@@ -1,5 +1,5 @@
 ---
-title: 'From RL to RLHF'
+title: 'Reinforcement Learning (1)'
 date: 2025-07-01
 permalink: /posts/2025/07/Reinforcement Learning (1)/
 tags:
