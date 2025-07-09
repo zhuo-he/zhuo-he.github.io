@@ -1,6 +1,6 @@
 ---
 title: 'From RL to RLHF (1)'
-date: 2025-07-01
+date: 2025-07-09
 permalink: /posts/2025/07/From RL to RLHF (1)/
 tags:
   - cool posts
@@ -331,7 +331,7 @@ $$
 
 其中 $$f$$ 是一个压缩映射是指，$$\forall x_1,x_2 \in \mathbb{R}^d$$，$$\lVert f(x_1)-f(x_2) \rVert \le \gamma \lVert x_1-x_2 \rVert $$，$$\gamma\in (0,1)$$。
 
-[可以证明 $$f(V_\pi)$$ 中的 $$f$$ 是一个压缩映射](https://github.com/MathFoundationRL/Book-Mathematical-Foundation-of-Reinforcement-Learning)。这表明对于贝尔曼最优方程 $$V_\pi=\max_\pi (R_\pi+\gamma P_\pi V_\pi)=f(V_\pi)$$，总是存在且唯一存在一个不动点 $$V_\pi^*$$，并且能通过
+[可以证明](https://github.com/MathFoundationRL/Book-Mathematical-Foundation-of-Reinforcement-Learning/blob/main/3%20-%20Chapter%203%20Optimal%20State%20Values%20and%20Bellman%20Optimality%20Equation.pdf)， $$f(V_\pi)$$ 中的 $$f$$ 是一个压缩映射。这表明对于贝尔曼最优方程 $$V_\pi=\max_\pi (R_\pi+\gamma P_\pi V_\pi)=f(V_\pi)$$，总是存在且唯一存在一个不动点 $$V_\pi^*$$，并且能通过
 
 $$
 V_\pi^{k+1}=\max_\pi (R_\pi+\gamma P_\pi V_\pi^k)
@@ -343,7 +343,7 @@ $$
 \pi^*=\text{argmax}_{\pi}(R_\pi+\gamma P_\pi V_\pi^*)
 $$
 
-[可以证明，$$\pi^*$$ 就是最优策略，且 $$V_{\pi}^*$$ 是最优状态价值函数](https://github.com/MathFoundationRL/Book-Mathematical-Foundation-of-Reinforcement-Learning)。这个 $$\pi^*$$ 就是前面说的，选择使 Q 函数最大的动作的、确定性的、贪婪的策略。此时，
+[可以证明](https://github.com/MathFoundationRL/Book-Mathematical-Foundation-of-Reinforcement-Learning/blob/main/3%20-%20Chapter%203%20Optimal%20State%20Values%20and%20Bellman%20Optimality%20Equation.pdf)，$$\pi^*$$ 就是最优策略，且 $$V_{\pi}^*$$ 是最优状态价值函数。这个 $$\pi^*$$ 就是前面说的，选择使 Q 函数最大的动作的、确定性的、贪婪的策略。此时，
 
 $$
 V_\pi^*=R_\pi + \gamma P_\pi V_\pi^*
@@ -427,7 +427,7 @@ $$
 \pi_{k+1}=\text{argmax}_{\pi} (R_\pi + \gamma P_\pi V_\pi^{(n)})
 $$
 
-其中 $$V^{(n)}_\pi$$ 为 $$n$$ 次内部迭代后得到的价值函数，类似前面每次迭代选取的最优策略利用贪婪得到。可以证明，$$V_{\pi_{k+1}}\ge V_{\pi_k}$$ ，即**策略每次更新都在不断改进**，并最终会收敛到最优解 $$V^*_{\pi}$$ 。
+其中 $$V^{(n)}_\pi$$ 为 $$n$$ 次内部迭代后得到的价值函数，类似前面每次迭代选取的最优策略利用贪婪得到。[可以证明](https://github.com/MathFoundationRL/Book-Mathematical-Foundation-of-Reinforcement-Learning/blob/main/3%20-%20Chapter%204%20Value%20Iteration%20and%20Policy%20Iteration.pdf)，$$V_{\pi_{k+1}}\ge V_{\pi_k}$$ ，即**策略每次更新都在不断改进**，并最终会收敛到最优解 $$V^*_{\pi}$$ 。
 
 **算法流程：** 
 
@@ -439,7 +439,158 @@ $$
 
 至此，马尔可夫决策过程的内容大体完毕，这一章主要介绍了马尔可夫奖励过程、马尔可夫决策过程、贝尔曼方程以及两种简单 value-based 方法：价值迭代与策略迭代。
 
+# 3. 策略梯度
+
+在上一章的最后介绍了一些 value-based 方法，即价值迭代与策略迭代，它们基于贝尔曼最优方程，通过逐步提升状态价值函数 $$V_\pi$$ 进而间接获得最优策略。本章要介绍的策略梯度属于 **policy-based 方法**，这种方法将策略参数化为一个网络，并通过梯度提升的方式更新策略网络，以最大化状态价值函数。我们直接来介绍**策略梯度定理**，经过资料查找，策略梯度定理有一些不同形式，这里仅选取一种与前面内容最为紧密的进行介绍。
+
+## 3.1. 策略梯度定理
+
+我们将策略定义为一个具有参数 $$\theta$$ 的网络 $$\pi_\theta$$ ，设初始状态为 $$s_0$$，将目标函数 $$J(\theta)$$ 定义为在策略 $$\pi_\theta$$ 下初始状态为 $$s_0$$ 的目标函数：
+
+$$
+J(\theta)\triangleq V_{\pi_\theta}(s_0)
+$$
+
+我们的目标是最大化 $$J(\theta)$$，即最大化初始状态下的状态价值。下面给出策略梯度：
+
+$$
+\nabla_\theta J(\theta)\propto \mathbb{E}_{s\sim D^{\pi_\theta},a\sim \pi_\theta(a\mid s)} [Q_{\pi_\theta}(s,a)\nabla_\theta \log \pi_\theta(a\mid s)]
+$$
+
+其中 $$D^{\pi_\theta}$$ 为归一化后的状态分布。
+
+证明：
+
+$$
+\begin{aligned}
+\nabla_\theta J(\theta)&=\nabla_\theta V_{\pi_\theta}(s_0)\\
+&=\nabla_\theta[\sum_{a_0} \pi_\theta(a_0\mid s_0)Q_{\pi_\theta}(s_0,a_0)]\\
+&=\sum_{a_0}[\nabla_\theta \pi_\theta(a_0\mid s_0)Q_{\pi_\theta}(s_0,a_0)+\pi_\theta(a_0\mid s_0)\nabla_\theta Q_{\pi_\theta}(s_0,a_0)]\\
+&=\sum_{a_0}[\nabla_\theta \pi_\theta(a_0\mid s_0)Q_{\pi_\theta}(s_0,a_0)+\pi_\theta(a_0\mid s_0)\nabla_\theta [R(s_0,a_0)+\gamma \sum_{s_1}p(s_1\mid s_0,a_0)V_{\pi_\theta}(s_1)]]\\
+&=\sum_{a_0}[\nabla_\theta \pi_\theta(a_0\mid s_0)Q_{\pi_\theta}(s_0,a_0)+\gamma\ \pi_\theta(a_0\mid s_0)  \sum_{s_1}p(s_1\mid s_0,a_0) \nabla_\theta V_{\pi_\theta}(s_1)]\\
+\end{aligned}
+$$
+
+可以看出求 $$V_{\pi_\theta}(s_0)$$ 的梯度涉及到求下一个转移状态 $$s_1$$ 的状态价值梯度 $$V_{\pi_\theta}(s_1)$$ ，这显然是一个递归的过程。为方便推导，我们记 $$\text{Pr}(s_0\rightarrow x,t,\pi_\theta)$$ 为状态 $$s_0$$ 在策略 $$\pi_\theta$$ 下经过 $$t$$ 步转移到状态 $$x$$ 的概率，则
+
+$$
+\text{Pr}(s_0\rightarrow s,0,\pi_\theta)=1 \\
+\text{Pr}(s_0\rightarrow s_1,1,\pi_\theta)=\sum_{a_0}\pi_\theta(a_0\mid s_0)p(s_1\mid s_0,a_0)
+$$
+
+记 $$\phi(s)=\sum_a \nabla_\theta \pi_\theta(a\mid s)Q_{\pi_\theta}(s,a)$$ ，那么继续往下推：
+
+$$
+\begin{aligned}
+\nabla_\theta V_{\pi_\theta}(s_0)&=\phi(s_0)+\gamma \sum_{s_1}\sum_{a_0}\pi_\theta(a_0\mid s_0)p(s_1\mid s_0,a_0)\nabla_\theta V_{\pi_\theta}(s_1)\\
+&=\phi(s_0)+\gamma \sum_{s_1}\text{Pr}(s_0\rightarrow s_1,1,\pi_\theta)\nabla_\theta V_{\pi_\theta}(s_1)\\
+&=\phi(s_0)+\gamma \sum_{s_1}\text{Pr}(s_0\rightarrow s_1,1,\pi_\theta)[\phi(s_1)+\gamma \sum_{s_2}\text{Pr}(s_1\rightarrow s_2,1,\pi_\theta)\nabla_\theta V_{\pi_\theta}(s_2)]\\
+&=\phi(s_0)+\gamma \sum_{s_1}\text{Pr}(s_0\rightarrow s_1,1,\pi_\theta)\phi(s_1)+\gamma^2 \sum_{s_2}\text{Pr}(s_0\rightarrow s_2,2,\pi_\theta)\nabla_\theta V_{\pi_{\theta}}(s_2)\\
+&= \cdots\\
+&= \sum_{t=0}^{∞} \sum_{s_t} \gamma^t \text{Pr}(s_0\rightarrow s_t,t,\pi_\theta)\phi(s_t)
+\end{aligned}
+$$
+
+带入 $$\phi(s)$$ 的表达式得
+
+$$
+\begin{aligned}
+\nabla_\theta V_{\pi_\theta}(s_0)&=\sum_{t=0}^{∞} \sum_{s_t} \gamma^t \text{Pr}(s_0\rightarrow s_t,t,\pi_\theta)[\sum_{a_t}\nabla_\theta \pi_\theta(a_t\mid s_t)Q_{\pi_\theta}(s_t,a_t)]\\
+&=\sum_{t=0}^{∞} \sum_{s_t} \gamma^t \text{Pr}(s_0\rightarrow s_t,t,\pi_\theta)[\sum_{a_t}\pi_\theta(a_t\mid s_t)[Q_{\pi_\theta}(s_t,a_t) \nabla_\theta \log \pi_\theta(a_t\mid s_t)]]
+\end{aligned}
+$$
+
+记 $$d^{\pi_\theta}(s)=\sum_{t=0}^{∞} \gamma^t \text{Pr}(s_0\rightarrow s_t,t,\pi_\theta)$$ 为折扣状态分布，由于
+
+$$
+\begin{aligned}
+\sum_s d^{\pi_\theta}(s)&=\sum_s \sum_{t=0}^{∞} \gamma^t \text{Pr}(s_0\rightarrow s_t,t,\pi_\theta)\\
+&=\sum_{t=0}^{∞} \gamma^t\\
+&=\frac{1}{1-\gamma}
+\end{aligned}
+$$
+
+因此它并不是一个标准分布，我们令 $$D^{\pi_\theta}(s)=(1-\gamma)  d^{\pi_\theta}(s)$$ 将其归一化，那么
+
+$$
+\begin{aligned}
+\nabla_\theta V_{\pi_\theta}(s_0)&=\frac{1}{1-\gamma} \sum_s D^{\pi_\theta}(s)[\sum_{a_t}\pi_\theta(a_t\mid s_t)[Q_{\pi_\theta}(s_t,a_t) \nabla_\theta \log \pi_\theta(a_t\mid s_t)]]\\
+&\propto \mathbb{E}_{s\sim D^{\pi_\theta}(s),a\sim \pi_\theta(a\mid s)}[Q_{\pi_\theta}(s,a) \nabla_\theta \log \pi_\theta(a\mid s)]
+\end{aligned}
+$$
+
+综上，我们有
+
+$$
+\nabla_\theta J(\theta)\propto \mathbb{E}_{s\sim D^{\pi_\theta},a\sim \pi_\theta(a\mid s)} [Q_{\pi_\theta}(s,a)\nabla_\theta \log \pi_\theta(a\mid s)]
+$$
+
+至此，策略梯度定理证明完毕。实际实现时，我们往往更关心梯度方向而非大小，并且这也可以通过学习率大小来调节，所以成正比而非严格等于是无关紧要的。
+
+从蒙特卡洛的角度看，我们可以先采出 $$N$$ 条动作状态轨迹：
+
+$$
+\tau^0=s_0^0,a_0^0,s_1^0,a_1^0,\cdots \\
+\tau^1=s_0^1,a_0^1,s_1^1,a_1^1,\cdots \\
+\cdots
+$$
+
+随后进行策略梯度的估计：
+
+$$
+\nabla_\theta J(\theta)=\frac{1}{N}\sum_{n=0}^N \sum_{t=0}^T Q_{\pi_\theta}(s_t^n,a_t^n)\nabla_\theta \log \pi_\theta(a_t^n\mid s_t^n)
+$$
+
+## 3.2. 优势函数
+
+从策略梯度中看出，Q 函数可以被视作一个权重，当某个状态动作的价值为负值时，策略网络更新后会降低该动作的概率，反之亦然。但是，很多场景中的 Q 值都是正值，在理想情况下，采样了足够多足够丰富的动作后也没什么问题，由于概率归一化，Q 值小的动作概率也会降低。但是当这一条件不成立时，高价值的动作可能由于没有被采样到而在网络更新后被降低概率，这是我们不希望看到的。
+
+一个直接的做法是添加基线，这个基线一般可以取所有动作价值的均值，这样 Q 值就会有正有负，就可以有效解决上述问题。因为 $$V_\pi(s)=\mathbb{E}_\pi Q(s,a)$$ ，所以就可以取状态价值 $$V_\pi(s)$$ 为基线。
+
+可以证明，带有基线的策略梯度是无偏的，只需证明 $$\mathbb{E}_{s\sim D^{\pi_\theta},a\sim \pi_\theta(a\mid s)} [V_{\pi_\theta}(s)\nabla_\theta \log \pi_\theta(a\mid s)]=0$$ ：
+
+$$
+\begin{aligned}
+\mathbb{E}_{s\sim D^{\pi_\theta},a\sim \pi_\theta(a\mid s)} [V_{\pi_\theta}(s)\nabla_\theta \log \pi_\theta(a\mid s)]&=\sum_s\sum_a D^{\pi_\theta}(s)\pi_\theta(a\mid s)V_{\pi_\theta}(s)\nabla_\theta \log \pi_\theta(a\mid s)\\
+&=\sum_s D^{\pi_\theta}(s)V_{\pi_\theta}(s)\sum_a \pi_\theta(a\mid s)\nabla_\theta \log \pi_\theta(a\mid s)\\
+&=\sum_s D^{\pi_\theta}(s)V_{\pi_\theta}(s) \nabla_\theta \sum_a \pi_\theta(a\mid s)\\
+&=0
+\end{aligned}
+$$
+
+基于此，下面引出**优势函数** 
+
+$$
+A_{\pi_\theta}(s,a)=Q_{\pi_\theta}(s,a)-V_{\pi_\theta}(s)
+$$
+
+优势函数表示在状态 $$s$$ 下采取动作 $$a$$ 相较于平均动作的价值差异。当 $$A_\pi(s,a)> 0$$ 则说明采取的动作 $$a$$ 比当前策略下的平均动作更好，当 $$A_\pi(s,a)> 0$$ 则说明采取的动作 $$a$$ 比当前策略下的平均动作更差。优势函数通常可以通过一个网络进行建模，这个网络就是**评论员（Critic）**网络，策略网络输出要采取的动作，又被称为**演员（Actor）**。
+
+## 3.3. 广义优势估计
+
+**广义优势估计（Generalized Advantage Estimation, GAE）**是一种对优势函数的估计方法，将优势函数展开：
+
+$$
+\begin{aligned}
+A_\pi(s,a)&=Q_\pi(s,a)-V_\pi(s)\\
+&=\mathbb{E}_{s^{\prime}\sim p(s^{\prime}\mid s,a)}[R(s,a)+\gamma V_\pi(s^{\prime})]-V_\pi(s)\\
+&=\mathbb{E}_{s^{\prime}\sim p(s^{\prime}\mid s,a)}[R(s,a)+\gamma V_\pi(s^{\prime})-V_\pi(s)]
+\end{aligned}
+$$
+
+借助这个公式来定义**广义优势函数**：
+
+$$
+A_\pi^{\text{GAE}}(s_t,a_t)=\sum_{k=0}^{∞} (\gamma \lambda)^k [R(s_t,a_t)+\gamma V_\pi(s_{t+1})-V_\pi(s_{t})]
+$$
+
+当 $$\lambda$$ 很小时，GAE 退化为一步时序差分 $$R(s_t,a_t)+\gamma V_\pi(s_{t+1})-V_\pi(s_{t})$$ ；
+
+当 $$\lambda$$ 接近于 1 时，GAE 利用整个序列来估计优势。
+
 
 *Reference*:
 - [磨菇书 EasyRL](https://datawhalechina.github.io/easy-rl/#/)
 - [强化学习的数学原理](https://github.com/MathFoundationRL/Book-Mathematical-Foundation-of-Reinforcement-Learning)
+- [强化学习：从策略梯度到TRPO、PPO、DPO、GRPO](https://zhuanlan.zhihu.com/p/26603287144)
+- [【策略梯度定理】推导、证明、深入理解与代码实现](https://zhuanlan.zhihu.com/p/491647161)
