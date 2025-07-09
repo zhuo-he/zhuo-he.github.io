@@ -87,8 +87,8 @@ $$Q_\pi(s,a)=\mathbb{E}_\pi[G_t\mid s_t=s,a_t=a]=\mathbb{E}_\pi[\sum_{k=0}^{∞}
 
 根据智能体学习的事物不同，可以把智能体进行归类：
 
-- **基于价值的智能体（Value-based agent）**，它显式地学习价值函数，隐式地学习它的策略。策略是其从学到的价值函数里面推算出来的。->基于价值的迭代
-- **基于策略的智能体（Policy-based agent）**，直接学习策略，并没有学习价值函数。->基于策略的迭代
+- **基于价值的智能体（Value-based agent）**，它显式地学习价值函数，隐式地学习它的策略。策略是其从学到的价值函数里面推算出来的。
+- **基于策略的智能体（Policy-based agent）**，直接学习策略，并没有学习价值函数。
 - **演员-评论员智能体（Actor-Critic agent）**，它同时学习策略和价值函数，然后通过两者的交互得到最佳的动作。
 
 # 2. 马尔可夫决策过程
@@ -106,17 +106,17 @@ $$
 $$R(s_t)=\mathbb{E}[r_{t+1}\mid s_t]$$ 为即时回报。下面我们来证明这个等式，首先证明下面这样一个等式：
 
 $$
-\mathbb{E} [G(s_{t+1})\mid s_t]=\mathbb{E}[V(s_{t+1})\mid s_t]
+\mathbb{E} [G_{t+1}\mid s_t]=\mathbb{E}[V(s_{t+1})\mid s_t]
 $$
 
-这个等式表明，在给定 t 时刻状态 $$s_t$$下， t+1 时刻的价值期望与折扣回报期望相同。直观上来说，这个等式成立是因为随机变量 $$G(s_{t+1})$$ 的不确定性来自两个方面：①状态 $$s_t$$ 转移到状态 $$s_{t+1}$$；②状态 $$s_{t+1}$$ 之后的随机决策链。第②项的期望即为 $$V(s_{t+1})$$，再对第一层求平均即为给定 $$s_t$$ 下 $$G(s_{t+1})$$ 的期望。下面用公式证明：
+这个等式表明，在给定 t 时刻状态 $$s_t$$下， t+1 时刻的价值期望与折扣回报期望相同。直观上来说，这个等式成立是因为随机变量 $$G_{t+1}$$ 的不确定性来自两个方面：①状态 $$s_t$$ 转移到状态 $$s_{t+1}$$；②状态 $$s_{t+1}$$ 之后的随机决策链。第②项的期望即为 $$V(s_{t+1})$$，再对第一层求平均即为给定 $$s_t$$ 下 $$G_{t+1}$$ 的期望。下面用公式证明：
 
 由重期望公式 $$\mathbb{E}[X]=\mathbb{E}[\mathbb{E}[X\mid Y]]$$，可以得到 $$\mathbb{E}[X\mid Z]=\mathbb{E}[\mathbb{E}[X\mid Y,Z]\mid Z]$$ 
 
 $$
 \begin{aligned}
-\mathbb{E}[G(s_{t+1})\mid s_t]&=\mathbb{E}[\mathbb{E}[G(s_{t+1})\mid s_{t+1},s_t]\mid s_t] \\
-&=\mathbb{E}[\mathbb{E}[G(s_{t+1})\mid s_{t+1}]\mid s_t] \\
+\mathbb{E}[G_{t+1}\mid s_t]&=\mathbb{E}[\mathbb{E}[G_{t+1}\mid s_{t+1},s_t]\mid s_t] \\
+&=\mathbb{E}[\mathbb{E}[G_{t+1}\mid s_{t+1}]\mid s_t] \\
 &=\mathbb{E}[V(s_{t+1})\mid s_t]
 \end{aligned}
 $$
@@ -127,13 +127,13 @@ $$
 \begin{aligned}
 V(s_t)&=\mathbb{E}[\sum_{k=0}^{T-t-1} \gamma^k r_{t+k+1}\mid s_t]\\
 &=\mathbb{E}[r_{t+1}+\sum_{k=1}^{T-t-1}\gamma^k r_{t+k+1}\mid s_t]\\
-&=\mathbb{E}[r_{t+1}\mid s_t]+\gamma \mathbb{E}[G(s_{t+1})\mid s_t]\\
+&=\mathbb{E}[r_{t+1}\mid s_t]+\gamma \mathbb{E}[G_{t+1}\mid s_t]\\
 &=R(s_{t}) +\gamma \mathbb{E}[V(s_{t+1})\mid s_t]\\
 &=R(s_{t})+\gamma \sum_{s_{t+1}}p(s_{t+1}\mid s_t) V(s_{t+1})
 \end{aligned}
 $$
 
-注：由于 $$r_{t+1},G(s_{t+1}),V(s_{t+1})$$ 均为随机变量 $$s_{t+1}$$ 的函数，因此上面原始表达式都是对 $$s_{t+1}$$ 求期望。
+注：由于 $$r_{t+1},G_{t+1},V(s_{t+1})$$ 均为随机变量 $$s_{t+1}$$ 的函数，因此上面原始表达式都是对 $$s_{t+1}$$ 求期望。
 
 ## 2.2. 马尔可夫决策过程
 
