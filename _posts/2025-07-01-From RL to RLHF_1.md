@@ -525,7 +525,9 @@ $$
 \nabla_\theta J(\theta)\propto \mathbb{E}_{s\sim D^{\pi_\theta},a\sim \pi_\theta(a\mid s)} [Q_{\pi_\theta}(s,a)\nabla_\theta \log \pi_\theta(a\mid s)]
 $$
 
-至此，策略梯度定理证明完毕。实际实现时，我们往往更关心梯度方向而非大小，并且这也可以通过学习率大小来调节，所以成正比而非严格等于是无关紧要的。
+至此，策略梯度定理证明完毕。从策略梯度中可以看出，$$\nabla_\theta \log \pi_\theta(a\mid s)$$ 为对数似然 $$\log \pi_\theta(a\mid s)$$ 对 $$\theta$$ 的梯度，可以从 $$s\sim D^{\pi_\theta},a\sim \pi_\theta(a\mid s)$$ 中采样出一条状态动作组成的轨迹 $$\tau$$，那么策略梯度的直观理解就是增大动作价值大的轨迹概率，并降低动作价值小的轨迹概率，最终实现总的状态价值最大化。
+
+实际实现时，我们往往更关心梯度方向而非大小，并且这也可以通过学习率大小来调节，所以成正比而非严格等于是无关紧要的。
 
 从蒙特卡洛的角度看，我们可以先采出 $$N$$ 条动作状态轨迹：
 
@@ -541,13 +543,21 @@ $$
 \nabla_\theta J(\theta)=\frac{1}{N}\sum_{n=0}^N \sum_{t=0}^T Q_{\pi_\theta}(s_t^n,a_t^n)\nabla_\theta \log \pi_\theta(a_t^n\mid s_t^n)
 $$
 
+注意到 $$Q(s_t,a_t)=\mathbb{E}[G_{t}\mid s_t,a_t]=\mathbb{E}[\sum_{k=0}^{T-t-1}\gamma^k r_{t+k+1}\mid s_t,a_t]$$，对于单条轨迹， $$Q(s_t,a_t)$$ 近似为确定性折扣累积奖励 $$\sum_{k=0}^{T-t-1}\gamma^k r_{t+k+1}$$，这其实就是 **REINFORCE 算法**，REINFORCE 更新 $$\theta$$ 的梯度为
+
+$$
+\nabla_\theta J(\theta)\approx \frac{1}{N}\sum_{n=0}^N \sum_{t=0}^T (\sum_{k=0}^{T-t-1}\gamma^k r_{t+k+1}^n) \nabla_\theta \log \pi_\theta(a_t^n\mid s_t^n)
+$$
+
+REINFORCE 本质上是通过蒙特卡洛方法对 $$Q_{\pi_\theta}$$ 实现无偏估计，但缺点是方差高。
+
 ## 3.2. 优势函数
 
 从策略梯度中看出，Q 函数可以被视作一个权重，当某个状态动作的价值为负值时，策略网络更新后会降低该动作的概率，反之亦然。但是，很多场景中的 Q 值都是正值，在理想情况下，采样了足够多足够丰富的动作后也没什么问题，由于概率归一化，Q 值小的动作概率也会降低。但是当这一条件不成立时，高价值的动作可能由于没有被采样到而在网络更新后被降低概率，这是我们不希望看到的。
 
-一个直接的做法是添加基线，这个基线一般可以取所有动作价值的均值，这样 Q 值就会有正有负，就可以有效解决上述问题。因为 $$V_\pi(s)=\mathbb{E}_\pi Q(s,a)$$ ，所以就可以取状态价值 $$V_\pi(s)$$ 为基线。
+一个较好做法是添加基线并让 Q 函数减去基线，这个基线一般可以取所有动作价值的期望，这样权重就会有正有负，就可以有效解决上述问题。因为 $$V_\pi(s)=\mathbb{E}_\pi Q(s,a)$$ ，所以就可以取状态价值 $$V_\pi(s)$$ 为基线。
 
-可以证明，带有基线的策略梯度是无偏的，只需证明 $$\mathbb{E}_{s\sim D^{\pi_\theta},a\sim \pi_\theta(a\mid s)} [V_{\pi_\theta}(s)\nabla_\theta \log \pi_\theta(a\mid s)]=0$$ ：
+可以证明，带有 $$V_\pi(s)$$ 基线的策略梯度是无偏的（更一般地，带有常数基线都是无偏的），只需证明 $$\mathbb{E}_{s\sim D^{\pi_\theta},a\sim \pi_\theta(a\mid s)} [V_{\pi_\theta}(s)\nabla_\theta \log \pi_\theta(a\mid s)]=0$$ ：
 
 $$
 \begin{aligned}
@@ -564,33 +574,71 @@ $$
 A_{\pi_\theta}(s,a)=Q_{\pi_\theta}(s,a)-V_{\pi_\theta}(s)
 $$
 
-优势函数表示在状态 $$s$$ 下采取动作 $$a$$ 相较于平均动作的价值差异。当 $$A_\pi(s,a)> 0$$ 则说明采取的动作 $$a$$ 比当前策略下的平均动作更好，当 $$A_\pi(s,a)> 0$$ 则说明采取的动作 $$a$$ 比当前策略下的平均动作更差。优势函数通常可以通过一个网络进行建模，这个网络就是**评论员（Critic）**网络，策略网络输出要采取的动作，又被称为**演员（Actor）**。
+优势函数表示在状态 $$s$$ 下采取动作 $$a$$ 相较于平均动作的价值差异。当 $$A_\pi(s,a)> 0$$ 则说明采取的动作 $$a$$ 比当前策略下的平均动作更好，当 $$A_\pi(s,a)> 0$$ 则说明采取的动作 $$a$$ 比当前策略下的平均动作更差。
 
 ## 3.3. 广义优势估计
 
-**广义优势估计（Generalized Advantage Estimation, GAE）**是一种对优势函数的估计方法，将优势函数展开：
+在基于优势函数的策略梯度中，需要对 $$A_\pi(s,a)$$ 进行估计，REINFORCE 通过 model-free 的蒙特卡洛采样来实现，其特点是低偏差，但可能引入高方差。现在从另一个角度考虑，将优势函数展开：
 
 $$
 \begin{aligned}
-A_\pi(s,a)&=Q_\pi(s,a)-V_\pi(s)\\
-&=\mathbb{E}_{s^{\prime}\sim p(s^{\prime}\mid s,a)}[R(s,a)+\gamma V_\pi(s^{\prime})]-V_\pi(s)\\
-&=\mathbb{E}_{s^{\prime}\sim p(s^{\prime}\mid s,a)}[R(s,a)+\gamma V_\pi(s^{\prime})-V_\pi(s)]
+A_\pi(s_t,a_t)&=Q_\pi(s_t,a_t)-V_\pi(s_t)\\
+&=\mathbb{E}_{s_{t+1}\sim p(s_{t+1}\mid s_t,a_t)}[R(s_t,a_t)+\gamma V_\pi(s_{t+1})]-V_\pi(s_t)\\
+&=\mathbb{E}_{s_{t+1}\sim p(s_{t+1}\mid s_t,a_t)}[R(s_t,a_t)+\gamma V_\pi(s_{t+1})-V_\pi(s_t)]
 \end{aligned}
 $$
 
-借助这个公式来定义**广义优势函数**：
+于是可以写出一步优势估计：
 
 $$
-A_\pi^{\text{GAE}}(s_t,a_t)=\sum_{k=0}^{∞} (\gamma \lambda)^k [R(s_t,a_t)+\gamma V_\pi(s_{t+1})-V_\pi(s_{t})]
+\hat{A}_t^{(1)}:=\delta_t^V=-V_\pi(s_t)+R_t+\gamma V_\pi(s_{t+1})
 $$
 
-当 $$\lambda$$ 很小时，GAE 退化为一步时序差分 $$R(s_t,a_t)+\gamma V_\pi(s_{t+1})-V_\pi(s_{t})$$ ；
+其中 $$V_\pi(\cdot)$$ 未知，需要进行近似，从而引入了偏差，这可以通过一个网络 $$V_\phi$$ 来实现，这个网络又被称为 **Critic**，策略网络 $$\pi_\theta$$ 又被称为 **Actor**。 这种方式计算高效，无需像蒙特卡洛方法那样等待整个轨迹结束，只需下一状态便可进行估计。为了减小偏差，Shulman 提出了**广义优势估计（GAE）**，它组合了优势函数的多步时序差分。我们继续改写优势函数：
 
-当 $$\lambda$$ 接近于 1 时，GAE 利用整个序列来估计优势。
+$$
+\begin{aligned}
+A_\pi(s_t,a_t)&=Q_\pi(s_t,a_t)-V_\pi(s_t)\\
+&=-V_\pi(s_t)+\mathbb{E}[\sum_{k=0}^{T-t-1}\gamma^k r_{t+k+1}\mid s_t,a_t]\\
+&=-V_\pi(s_t)+\mathbb{E}[r_{t+1}\mid s_t,a_t]+\gamma\mathbb{E}[r_{t+2}\mid s_t,a_t]+  \gamma^2\mathbb{E}[G_{t+2}\mid s_t,a_t]\\
+&=\mathbb{E}[-V_\pi(s_t)+R_{t+1}+\gamma R_{t+2}+  \gamma^2V_\pi(s_{t+2})]\\
+\end{aligned}
+$$
 
+所以优势函数 2 步估计为
+
+$$
+\hat{A}_t^{(2)}:=\delta_t^V+\gamma \delta_{t+1}^V=-V_\pi(s_t)+R_{t+1}+\gamma R_{t+2}+  \gamma^2V_\pi(s_{t+2})
+$$
+
+推广到 k 步估计：
+
+$$
+\hat{A}_t^{(k)}:=\sum_{l=0}^{k-1}\gamma^l \delta_{t+l}^V=-V_\pi(s_t)+R_{t+1}+\gamma R_{t+2}+ \cdots + \gamma^kV_\pi(s_{t+k})
+$$
+
+估计的步数越多，轨迹越长，偏差越小，方差越大。GAE 指数加权平均了 1 步到无穷步的优势函数估计：
+
+$$
+\begin{aligned}
+\hat{A}_t^{GAE(\gamma,\lambda)}&:=(1-\lambda)\hat{A}_t^{(1)}+(1-\lambda)\lambda \hat{A}_t^{(2)}+\cdots\\
+&=(1-\lambda)(\delta_t^V+\lambda(\delta_t^V+\gamma \delta_{t+1}^V)+\cdots)\\
+&=\sum_{l=0}^{∞}(\gamma \lambda)^l \delta_{t+l}^V\\
+&=\sum_{l=0}^{∞}(\gamma \lambda)^l(R_{t+l}+\gamma V_\pi(s_{t+l+1})-V_\pi(s_{t+l}))
+\end{aligned}
+$$
+
+上面式子第 1 行中第 $$l$$ 项的权重为 $$(1-\lambda)\lambda^l$$ ，这首先是一个指数衰减的权重，其次对 $$l$$ 求和为 $$1$$ ，保证了是一个凸组合。从上式可以看出：
+
+- 当 $$\lambda$$ 很小时，1 步估计具有很高的权重，而其余项权重很小，GAE 退化为一步时序差分 $$R_t+\gamma V_\pi(s_{t+1})-V_\pi(s_{t})$$ ；
+
+- 当 $$\lambda$$ 接近于 $$1$$ 时，后续项依然具有很高权重，GAE 利用整个序列来估计优势。
+
+总的来说，GAE $$\hat{A}_t^{GAE(\gamma,\lambda)}$$ 很好平衡了偏差与方差，能取得更好的效果，已经被广泛使用。
 
 *Reference*:
 - [磨菇书 EasyRL](https://datawhalechina.github.io/easy-rl/#/)
 - [强化学习的数学原理](https://github.com/MathFoundationRL/Book-Mathematical-Foundation-of-Reinforcement-Learning)
 - [强化学习：从策略梯度到TRPO、PPO、DPO、GRPO](https://zhuanlan.zhihu.com/p/26603287144)
 - [【策略梯度定理】推导、证明、深入理解与代码实现](https://zhuanlan.zhihu.com/p/491647161)
+- [Actor-Critic算法小结](https://zhuanlan.zhihu.com/p/29486661)
