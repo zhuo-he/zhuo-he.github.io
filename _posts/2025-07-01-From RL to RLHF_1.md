@@ -636,6 +636,126 @@ $$
 
 总的来说，GAE $$\hat{A}_t^{GAE(\gamma,\lambda)}$$ 很好平衡了偏差与方差，能取得更好的效果，已经被广泛使用。
 
+# 4. 基于策略的方法
+
+前面铺垫了那么多，终于到了这里。本章开始介绍一些我们常见的算法，包括 TRPO、PPO、DPO、GRPO。
+
+## 4.1. TRPO
+
+TRPO 全程 "Trust Region Policy Optimization"，即"信赖域策略优化"。它是一个基于策略梯度的算法，于2015年被伯克利的博士生John Schulman提出。
+
+在 TRPO 算法被提出之前，策略梯度算法的问题之一是更新步长的选取。如果步长选取不好，那么优化后的策略就可能变差，在差的策略上采样进行后续优化可能会导致策略网络越来越差，最终导致模型的崩溃。因此，如何选取一个合适的步长对于策略梯度算法至关重要，我们希望在策略更新后，新策略对应的价值函数的值不能更差。那么，一个自然的想法就是尝试将新策略的价值函数分解为旧策略的价值函数与其他项。如果其他项始终不小于 0 ，那么新策略的价值就是一直递增的。
+
+Sham Kakade 于2002年给出了以下等式，它给出了新策略 $$\tilde{\pi}$$ 价值与旧策略 $$\pi$$ 价值之间的关联：
+
+$$
+\eta(\tilde{\pi})=\eta(\pi)+\mathbb{E}_{s_0,a_0,\cdots \mid \tilde{\pi}}[\sum_{t=0}^{∞}\gamma^t A_\pi(s_t,a_t)]
+$$
+
+证明：
+
+记 $$\tau=(s_0,a_0,\cdots)$$ ，则
+
+$$
+\begin{aligned}
+&\mathbb{E}_{\tau \mid \tilde{\pi}}[\sum_{t=0}^{∞}\gamma^t A_\pi(s_t,a_t)]\\
+&=\mathbb{E}_{\tau \mid \tilde{\pi}}[\sum_{t=0}^{∞}\gamma^t(r(s_t,a_t)+\gamma V_\pi(s_{t+1})-V_\pi(s_t))]\\
+&=\mathbb{E}_{\tau \mid \tilde{\pi}}[\sum_{t=0}^{∞}\gamma^t r(s_t,a_t)+\sum_{t=0}^{∞}\gamma^t(\gamma V_\pi(s_{t+1})-V_\pi(s_t))]\\
+&=\mathbb{E}_{\tau \mid \tilde{\pi}}[\sum_{t=0}^{∞}\gamma^t r(s_t,a_t)]+\mathbb{E}_{s_0}[-V_\pi(s_0)]\\
+&=\eta(\tilde{\pi})-\eta(\pi)
+\end{aligned}
+$$
+
+移项即可得
+
+$$
+\eta(\tilde{\pi})=\eta(\pi)+\mathbb{E}_{s_0,a_0,\cdots \mid \tilde{\pi}}[\sum_{t=0}^{∞}\gamma^t A_\pi(s_t,a_t)]
+$$
+
+我们继续把上式右侧那一项多展开些：
+
+$$
+\eta(\tilde{\pi})=\eta(\pi)+\sum_{t=0}^{∞}\sum_s p(s_t=s\mid \tilde{\pi})\sum_a \tilde{\pi}(a\mid s)\gamma^t A_\pi(s,a)
+$$
+
+记 $$\rho_{\tilde{\pi}}(s)=\sum_{t=0}^{∞}\gamma^t p(s_t=s\mid \tilde{\pi})$$，那么
+
+$$
+\eta(\tilde{\pi})=\eta(\pi)+\sum_s \rho_{\tilde{\pi}}(s)\sum_a \tilde{\pi}(a\mid s)A_\pi(s,a)
+$$
+
+从上式可以看出，如果在状态 $$s$$ 下存在优势 $$A_\pi(s,a)>0$$ 的 $$a$$，那么在策略更新时只要取到这个动作，就能保证新策略 $$\tilde{\pi}$$ 的价值大于旧策略 $$\pi$$ 的价值。然而，在实际中优势并不总为正，并且由于此时动作由未知的新策略 $$\tilde{\pi}$$ 产生，这导致了难以直接优化 $$\eta(\tilde{\pi})$$。
+
+> 思考：直接的策略梯度优化方法中，只是给出了旧策略价值的上升方向，但是优化到新策略时，策略发生了变化，估计价值需要重新采样，因此新策略价值不一定好。而上式直接给出了新旧策略价值之间的关系，那么对于需要优化的新策略最大化其价值即可，但是上式右侧又导致了难以优化。
+
+由于目标函数 $$\eta(\tilde{\pi})$$ 难以优化，我们考虑 **minorization-maximization（MM）算法** 
+
+> MM算法是一种迭代优化方法，它利用函数的凸性来找到它们的最大值或最小值。当目标函数 $$f(\theta)$$ 难以优化时，算法不直接对目标函数求最优化解，转而寻求一个易于优化的目标函数 $$g(\theta)$$，通过对这个替代函数求解，使得 $$g(\theta)$$ 逐渐逼近 $$f(\theta)$$ 的最优解。
+>
+> MM代表“Majorize-Minimization”或“Minorize-Maximization”，取决于所需的优化是最大化还是最小化。
+>
+> - Majorize-Minimization：每次迭代找到原非凸目标函数的一个上界函数，求上界函数的最小值。
+> - Minorize-Maximization：每次迭代找到原非凸目标函数的一个下界函数，求下界函数的最大值。
+>
+> 下图是 Minorize-Maximization 的一个形象解释，可以看到，每次 M 函数向极大值点优化，f 函数的值也在逐渐被最大化。
+
+![img](/images/blogs/rlhf/4-1.png)
+
+回到正题，TRPO 这篇文章首先考虑忽略状态分布的变化，采取旧策略对应的状态分布，这是因为当新旧参数很接近时，我们将用旧的状态分布代替新的状态分布也是合理的。此时，原来的价值函数变成
+
+$$
+L_\pi(\tilde{\pi})=\eta(\pi)+\sum_s \rho_{\pi}(s)\sum_a \tilde{\pi}(a\mid s)A_\pi(s,a)
+$$
+
+TRPO 论文后续给出两个重要结论（中间忽略了很多细节，可以去论文查看）：
+
+$$
+L_{\pi_{\theta_0}}(\pi_{\theta_0})=\eta(\pi_{\theta_0}), \ \nabla_\theta L_{\pi_\theta}(\pi_\theta)\mid_{\theta=\theta_0}=\nabla_\theta \eta(\pi_\theta)\mid_{\theta=\theta_0}
+$$
+
+$$
+\eta(\tilde{\pi})\ge L_\pi(\tilde{\pi})-C\cdot \mathbb{D}_{KL}^{max}(\pi,\tilde{\pi})
+$$
+
+其中 $$\mathbb{D}_{KL}^{max}(\pi,\tilde{\pi}):=\max_s\mathbb{D}_{KL}(\pi(\cdot\mid s),\tilde{\pi}(\cdot\mid s))$$ 。设 $$M_i(\pi)=L_{\pi_i}(\pi)-C\cdot \mathbb{D}_{KL}^{max}(\pi_i,\pi)$$，那么可以推出：
+
+$$
+\eta(\pi_{i+1})\ge M_i(\pi_{i+1})\\
+\eta(\pi_i)=M_i(\pi_i)
+$$
+
+由 Minorize-Maximization 算法，我们的目标转化为了
+
+$$
+\max_{\tilde{\pi}} [L_\pi(\tilde{\pi})-C\cdot \mathbb{D}_{KL}^{max}(\tilde{\pi},\pi)]
+$$
+
+注意到 $$\eta(\pi_{i+1})-\eta(\pi_i)\ge M_i(\pi_{i+1})-M_i(\pi_i)$$，如果能找到新策略使得 $$M_i(\pi_{i+1})$$ 最大，那么
+
+$$
+\eta(\pi_{i+1})-\eta(\pi_i)\ge M_i(\pi_{i+1})-M_i(\pi_i)\ge 0
+$$
+
+这保证了新策略的价值相对于旧策略价值是提升的，同时也进一步解释了最大化 M 函数的合理性。还没完，为了让这一优化目标更加实用，论文还进行了一些处理。首先是利用**重要性采样**处理动作分布，对于 $$L_{\pi_{\theta_{old}}}(\pi_\theta)$$，其中第一项 $$\eta(\pi_{\theta_{old}})$$ 与优化目标无关我们忽略它 ，处理第二项：
+
+$$
+\begin{aligned}
+\sum_s \rho_{\pi_{\theta_{old}}}(s)\sum_a\pi_\theta(a\mid s)A_{\pi_{\theta_{old}}}(a,s)&=\sum_s\sum_{t=0}^{∞}\gamma^t p(s_t=s\mid \pi_{\theta_{old}})\sum_a\pi_\theta(a\mid s)A_{\pi_{\theta_{old}}}(a,s)\\
+&\approx\sum_{t=0}^{∞}\gamma^t \mathbb{E}_{s\sim \rho_{\pi_{\theta_{old}}}}[\sum_a\pi_\theta(a\mid s)A_{\pi_{\theta_{old}}}(a,s)] \qquad 表示不理解这一步    \\
+&\approx \frac{1}{1-\gamma} \mathbb{E}_{s\sim \rho_{\pi_{\theta_{old}}}}[\sum_a\pi_\theta(a\mid s)A_{\pi_{\theta_{old}}}(a,s)]\\
+&=\frac{1}{1-\gamma}\mathbb{E}_{s\sim \rho_{\pi_{\theta_{old}}},a\sim \pi_{\theta_{old}}}[\frac{\pi_\theta(a\mid s)}{\pi_{\theta_{old}}(a\mid s)}A_{\pi_{\theta_{old}}}(a,s)]
+
+\end{aligned}
+$$
+
+此外，将原问题转化为带约束的优化问题，并更改 KL 散度的形式，最终 TRPO 的优化目标为：
+
+$$
+\max_\theta \mathbb{E}_{s\sim \rho_{\pi_{\theta_{old}}},a\sim \pi_{\theta_{old}}}[\frac{\pi_\theta(a\mid s)}{\pi_{\theta_{old}}(a\mid s)}A_{\pi_{\theta_{old}}}(a,s)]\\
+s.t.\mathbb{E}_{s\sim \rho_{\pi_{\theta_{old}}}}[\mathbb{D}_{KL}(\pi_{\theta_{old}}(\cdot\mid s),\pi_\theta(\cdot\mid s))]\le \delta
+$$
+
+
 *Reference*:
 - [磨菇书 EasyRL](https://datawhalechina.github.io/easy-rl/#/)
 - [强化学习的数学原理](https://github.com/MathFoundationRL/Book-Mathematical-Foundation-of-Reinforcement-Learning)
