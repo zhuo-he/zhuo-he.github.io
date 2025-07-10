@@ -1,7 +1,7 @@
 ---
-title: 'From RL to RLHF (1)'
+title: 'From RL to RLHF'
 date: 2025-07-09
-permalink: /posts/2025/07/From RL to RLHF (1)/
+permalink: /posts/2025/07/From RL to RLHF/
 tags:
   - cool posts
 ---
