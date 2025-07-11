@@ -741,7 +741,7 @@ $$
 $$
 \begin{aligned}
 \sum_s \rho_{\pi_{\theta_{old}}}(s)\sum_a\pi_\theta(a\mid s)A_{\pi_{\theta_{old}}}(a,s)&=\sum_s\sum_{t=0}^{∞}\gamma^t p(s_t=s\mid \pi_{\theta_{old}})\sum_a\pi_\theta(a\mid s)A_{\pi_{\theta_{old}}}(a,s)\\
-&\approx\sum_{t=0}^{∞}\gamma^t \mathbb{E}_{s\sim \rho_{\pi_{\theta_{old}}}}[\sum_a\pi_\theta(a\mid s)A_{\pi_{\theta_{old}}}(a,s)] \qquad 表示不理解这一步    \\
+&\approx\sum_{t=0}^{∞}\gamma^t \mathbb{E}_{s\sim \rho_{\pi_{\theta_{old}}}}[\sum_a\pi_\theta(a\mid s)A_{\pi_{\theta_{old}}}(a,s)]    \\
 &\approx \frac{1}{1-\gamma} \mathbb{E}_{s\sim \rho_{\pi_{\theta_{old}}}}[\sum_a\pi_\theta(a\mid s)A_{\pi_{\theta_{old}}}(a,s)]\\
 &=\frac{1}{1-\gamma}\mathbb{E}_{s\sim \rho_{\pi_{\theta_{old}}},a\sim \pi_{\theta_{old}}}[\frac{\pi_\theta(a\mid s)}{\pi_{\theta_{old}}(a\mid s)}A_{\pi_{\theta_{old}}}(a,s)]
 
@@ -752,7 +752,7 @@ $$
 
 $$
 \max_\theta \mathbb{E}_{s\sim \rho_{\pi_{\theta_{old}}},a\sim \pi_{\theta_{old}}}[\frac{\pi_\theta(a\mid s)}{\pi_{\theta_{old}}(a\mid s)}A_{\pi_{\theta_{old}}}(a,s)]\\
-s.t.\mathbb{E}_{s\sim \rho_{\pi_{\theta_{old}}}}[\mathbb{D}_{KL}(\pi_{\theta_{old}}(\cdot\mid s),\pi_\theta(\cdot\mid s))]\le \delta
+s.t.\quad \mathbb{E}_{s\sim \rho_{\pi_{\theta_{old}}}}[\mathbb{D}_{KL}(\pi_{\theta_{old}}(\cdot\mid s),\pi_\theta(\cdot\mid s))]\le \delta
 $$
 
 
