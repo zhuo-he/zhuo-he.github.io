@@ -495,16 +495,16 @@ $$
 
 $$
 \begin{aligned}
-\nabla_\theta V_{\pi_\theta}(s_0)&=\sum_{t=0}^{∞} \sum_{s_t} \gamma^t \text{Pr}(s_0\rightarrow s_t,t,\pi_\theta)[\sum_{a_t}\nabla_\theta \pi_\theta(a_t\mid s_t)Q_{\pi_\theta}(s_t,a_t)]\\
-&=\sum_{t=0}^{∞} \sum_{s_t} \gamma^t \text{Pr}(s_0\rightarrow s_t,t,\pi_\theta)[\sum_{a_t}\pi_\theta(a_t\mid s_t)[Q_{\pi_\theta}(s_t,a_t) \nabla_\theta \log \pi_\theta(a_t\mid s_t)]]
+\nabla_\theta V_{\pi_\theta}(s_0)&=\sum_{t=0}^{∞} \sum_{s} \gamma^t \text{Pr}(s_0\rightarrow s_t=s,t,\pi_\theta)[\sum_{a}\nabla_\theta \pi_\theta(a\mid s)Q_{\pi_\theta}(s,a)]\\
+&=\sum_{t=0}^{∞} \sum_{s} \gamma^t \text{Pr}(s_0\rightarrow s_t=s,t,\pi_\theta)[\sum_{a}\pi_\theta(a\mid s)[Q_{\pi_\theta}(s,a) \nabla_\theta \log \pi_\theta(a_t\mid s_t)]]
 \end{aligned}
 $$
 
-记 $$d^{\pi_\theta}(s)=\sum_{t=0}^{∞} \gamma^t \text{Pr}(s_0\rightarrow s_t,t,\pi_\theta)$$ 为折扣状态分布，由于
+记 $$d^{\pi_\theta}(s)=\sum_{t=0}^{∞} \gamma^t \text{Pr}(s_0\rightarrow s_t=s,t,\pi_\theta)$$ 为折扣状态分布，由于
 
 $$
 \begin{aligned}
-\sum_s d^{\pi_\theta}(s)&=\sum_s \sum_{t=0}^{∞} \gamma^t \text{Pr}(s_0\rightarrow s_t,t,\pi_\theta)\\
+\sum_s d^{\pi_\theta}(s)&=\sum_s \sum_{t=0}^{∞} \gamma^t \text{Pr}(s_0\rightarrow s_t=s,t,\pi_\theta)\\
 &=\sum_{t=0}^{∞} \gamma^t\\
 &=\frac{1}{1-\gamma}
 \end{aligned}
@@ -514,7 +514,7 @@ $$
 
 $$
 \begin{aligned}
-\nabla_\theta V_{\pi_\theta}(s_0)&=\frac{1}{1-\gamma} \sum_s D^{\pi_\theta}(s)[\sum_{a_t}\pi_\theta(a_t\mid s_t)[Q_{\pi_\theta}(s_t,a_t) \nabla_\theta \log \pi_\theta(a_t\mid s_t)]]\\
+\nabla_\theta V_{\pi_\theta}(s_0)&=\frac{1}{1-\gamma} \sum_s D^{\pi_\theta}(s)[\sum_{a}\pi_\theta(a\mid s)[Q_{\pi_\theta}(s,a) \nabla_\theta \log \pi_\theta(a\mid s)]]\\
 &\propto \mathbb{E}_{s\sim D^{\pi_\theta}(s),a\sim \pi_\theta(a\mid s)}[Q_{\pi_\theta}(s,a) \nabla_\theta \log \pi_\theta(a\mid s)]
 \end{aligned}
 $$
@@ -525,7 +525,7 @@ $$
 \nabla_\theta J(\theta)\propto \mathbb{E}_{s\sim D^{\pi_\theta},a\sim \pi_\theta(a\mid s)} [Q_{\pi_\theta}(s,a)\nabla_\theta \log \pi_\theta(a\mid s)]
 $$
 
-至此，策略梯度定理证明完毕。从策略梯度中可以看出，$$\nabla_\theta \log \pi_\theta(a\mid s)$$ 为对数似然 $$\log \pi_\theta(a\mid s)$$ 对 $$\theta$$ 的梯度，可以从 $$s\sim D^{\pi_\theta},a\sim \pi_\theta(a\mid s)$$ 中采样出一条状态动作组成的轨迹 $$\tau$$，那么策略梯度的直观理解就是增大动作价值大的轨迹概率，并降低动作价值小的轨迹概率，最终实现总的状态价值最大化。
+至此，策略梯度定理证明完毕。从策略梯度中可以看出，$$\nabla_\theta \log \pi_\theta(a\mid s)$$ 为对数似然 $$\log \pi_\theta(a\mid s)$$ 对 $$\theta$$ 的梯度，**可以从 $$s\sim D^{\pi_\theta},a\sim \pi_\theta(a\mid s)$$ 中采样出一条状态动作组成的轨迹 $$\tau$$**，那么策略梯度的直观理解就是增大动作价值大的轨迹概率，并降低动作价值小的轨迹概率，最终实现总的状态价值最大化。
 
 实际实现时，我们往往更关心梯度方向而非大小，并且这也可以通过学习率大小来调节，所以成正比而非严格等于是无关紧要的。
 
@@ -575,6 +575,31 @@ A_{\pi_\theta}(s,a)=Q_{\pi_\theta}(s,a)-V_{\pi_\theta}(s)
 $$
 
 优势函数表示在状态 $$s$$ 下采取动作 $$a$$ 相较于平均动作的价值差异。当 $$A_\pi(s,a)> 0$$ 则说明采取的动作 $$a$$ 比当前策略下的平均动作更好，当 $$A_\pi(s,a)> 0$$ 则说明采取的动作 $$a$$ 比当前策略下的平均动作更差。
+
+基于以上分析，我们将 Q 函数换成优势函数，策略梯度近似为
+
+$$
+\mathbb{E}_{s\sim D^{\pi_\theta},a\sim \pi_\theta(a\mid s)} [A_{\pi_\theta}(s,a)\nabla_\theta \log \pi_\theta(a\mid s)]
+$$
+
+更一般地，将策略梯度写成以下形式
+
+$$
+\mathbb{E}_{\tau\sim p(\tau)}[\sum_{t=0}^{∞} \Psi_t\nabla_\theta \pi_\theta(a_t\mid s_t)]
+$$
+
+其中 $$\Psi_t$$ 可以是以下多种形式：
+
+- $$\sum_{t=0}^{∞} \gamma^t r(s_t,a_t)$$ ，表示轨迹的总回报；
+- $$\sum_{t^\prime=t}^{∞} \gamma^t r(s_{t^\prime},a_{t^{\prime}})$$ ，表示在动作状态 $$s_{t},a_{t}$$ 之后的回报；
+- $$\sum_{t^\prime=t}^{∞} \gamma^t r(s_{t^\prime},a_{t^{\prime}}) - b(s_{t^\prime})$$ ，引入基线函数；
+- $$Q_{\pi_\theta}(s_t,a_t)$$ ，动作价值函数，直接学习 $$Q$$ 网络；
+- $$A_{\pi_\theta}(s_t,a_t)$$ ，优势函数，同时维护 $$Q$$ 网络和 $$V$$ 网络；
+- $$r(s_t,a_t)+\gamma V_{\pi_\theta}(s_{t+1},a_{t+1})-V_{\pi_\theta}(s_t,a_t)$$ ，一步时序差分估计，只需维护 $$V$$ 网络。
+
+最后一点会在下一小节详细说明。前三种本质上是利用蒙特卡洛采样方法，是 model-free 的方法，后三种需要利用网络对函数近似，是 model-based 方法。
+
+上述一系列算法被称为 **Actor-Critic**，其中 actor 表示策略模型 $$\pi_\theta$$，critic 表示价值模型 $$\Psi_\phi$$，它是 value-based 方法和 policy-based 方法的结合。actor 负责与环境交互采集数据，并在 critic 的指导下利用策略梯度学习一个更好的策略模型；critic 通过 actor 与环境交互产生的数据学习一个价值模型，思想类似策略评估，它负责判断状态与动作的好坏。
 
 ## 3.3. 广义优势估计
 
@@ -634,7 +659,7 @@ $$
 
 - 当 $$\lambda$$ 接近于 $$1$$ 时，后续项依然具有很高权重，GAE 利用整个序列来估计优势。
 
-总的来说，GAE $$\hat{A}_t^{GAE(\gamma,\lambda)}$$ 很好平衡了偏差与方差，能取得更好的效果，已经被广泛使用。
+总的来说，GAE $$\hat{A}_t^{GAE(\gamma,\lambda)}$$ 通过控制 $$\lambda$$ 很好平衡了偏差与方差，能取得更好的效果，已经被广泛使用。
 
 # 4. 基于策略的方法
 
@@ -642,7 +667,7 @@ $$
 
 ## 4.1. TRPO
 
-TRPO 全程 "Trust Region Policy Optimization"，即"信赖域策略优化"。它是一个基于策略梯度的算法，于2015年被伯克利的博士生John Schulman提出。
+TRPO 全称 "Trust Region Policy Optimization"，即"信赖域策略优化"。它是一个基于策略梯度的算法，于2015年被伯克利的博士生John Schulman提出。
 
 在 TRPO 算法被提出之前，策略梯度算法的问题之一是更新步长的选取。如果步长选取不好，那么优化后的策略就可能变差，在差的策略上采样进行后续优化可能会导致策略网络越来越差，最终导致模型的崩溃。因此，如何选取一个合适的步长对于策略梯度算法至关重要，我们希望在策略更新后，新策略对应的价值函数的值不能更差。那么，一个自然的想法就是尝试将新策略的价值函数分解为旧策略的价值函数与其他项。如果其他项始终不小于 0 ，那么新策略的价值就是一直递增的。
 
@@ -755,6 +780,42 @@ $$
 s.t.\quad \mathbb{E}_{s\sim \rho_{\pi_{\theta_{old}}}}[\mathbb{D}_{KL}(\pi_{\theta_{old}}(\cdot\mid s),\pi_\theta(\cdot\mid s))]\le \delta
 $$
 
+从优化目标上看，最大化目标要求寻找优势函数大的新策略，而 KL 散度约束项使得新旧策略之间的差异不大，这划定了一个"信任区域"，即在一个"信任区域"上寻找优势函数大的新策略，保持新策略的价值不断提升。
+
+最后说明一下 **On-Policy（同策略）与 Off-Policy（异策略）**的概念：
+
+- on-policy：训练过程中，模型利用自己的策略与环境交互生成数据，并用这些数据进行模型优化。
+- off-policy：训练过程中，模型无需实时生成数据，可以利用预先搜集好或者其他智能体生成的数据进行模型优化。
+
+虽然 TRPO 使用旧模型数据进行优化，但是新旧模型被信任区域限定，相差不算大，依然是 on-policy。
+
+## 4.2. PPO
+
+PPO 全称 "Proximal Policy Optimization"，即"近端策略优化"，它延续了 TRPO 的核心思想，能保证新策略的价值不断提升。它做了一些小改进使得实现更加简单，其核心思想是限制策略更新的幅度，避免因更新过大导致性能下降。
+
+### 4.2.1. PPO-penalty
+
+ppo-penalty 将 KL 散度约束项转化为惩罚项以限制策略更新，目标为：
+
+$$
+\max_\theta \mathbb{E}_{s\sim \rho_{\pi_{\theta_{old}}},a\sim \pi_{\theta_{old}}}[\frac{\pi_\theta(a\mid s)}{\pi_{\theta_{old}}(a\mid s)}A_{\pi_{\theta_{old}}}(a,s)-\beta \ \mathbb{D}_{KL}(\pi_{\theta_{old}}(\cdot\mid s),\pi_\theta(\cdot\mid s))]
+$$
+
+其中 $$\beta$$ 依据 KL 散度项的大小动态调整。
+
+### 4.2.2. PPO-clip
+
+ppo-clip 通过使用裁剪函数限制策略更新的幅度：
+
+$$
+\max_\theta \mathbb{E}_{s\sim \rho_{\pi_{\theta_{old}}},a\sim \pi_{\theta_{old}}}[\min\{\frac{\pi_\theta(a\mid s)}{\pi_{\theta_{old}}(a\mid s)}A_{\pi_{\theta_{old}}}(a,s),\text{clip}(\frac{\pi_\theta(a\mid s)}{\pi_{\theta_{old}}(a\mid s)},1-\epsilon,1+\epsilon)\cdot A_{\pi_{\theta_{old}}}(a,s) \}]
+$$
+
+$$\text{clip}$$ 函数限制了新旧策略的比率 $$\frac{\pi_\theta(a\mid s)}{\pi_{\theta_{old}}(a\mid s)}$$ ，即限制了新旧策略的更新幅度。
+
+### 4.2.3. 与 RLHF 的联系
+
+to be continued
 
 *Reference*:
 - [磨菇书 EasyRL](https://datawhalechina.github.io/easy-rl/#/)
