@@ -655,8 +655,30 @@ return output
 }
 ```
 
-随后对单个 sample，首先将预定义的 template 中 slot 的 {{content}} 替换为相应 message 中的内容，从而得到数据的对话模板，并将其用 tokenizer 编码为 list[int]，其中 self 为前面加载的 template：
+随后对单个 sample，首先将预定义的 template 中 slot 的 "{{content}}" 替换为相应 message 中的内容，从而得到数据的对话模板，并将其用 tokenizer 编码为 list[int]，其中 self 为前面加载的 template：
+```python
+for i, message in enumerate(messages):
+    elements = []
 
+    if i == 0:
+        elements += self.format_prefix.apply() # 返回定义format_prefix时传入的slot
+        if system or tools:
+            tool_text = self.format_tools.apply(content=tools)[0] if tools else "" # tool_text: 返回调用工具的prompt, self.format_tools由调用的template自定义
+            elements += self.format_system.apply(content=(system + tool_text)) # 将定义format_systerm的slot中的{{content}}更换为(system + tool_text)
+
+    if message["role"] == Role.USER: # format_user, format_assistant, format_observation工作原理同format_systerm
+        elements += self.format_user.apply(content=message["content"], idx=str(i // 2)) # 为什么有个idx? A: 区分user和assistant
+    elif message["role"] == Role.ASSISTANT:
+        elements += self.format_assistant.apply(content=message["content"])
+    elif message["role"] == Role.OBSERVATION:
+        elements += self.format_observation.apply(content=message["content"])
+    elif message["role"] == Role.FUNCTION:
+        elements += self.format_function.apply(content=message["content"])
+    else:
+        raise NotImplementedError("Unexpected role: {}".format(message["role"]))
+        
+    encoded_messages.append(self._convert_elements_to_ids(tokenizer, elements))
+```
 
 ```python
 # first loop
