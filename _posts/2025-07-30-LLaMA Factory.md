@@ -5,6 +5,7 @@ permalink: /posts/2025/07/LLaMAFactory Code Analysis/
 tags:
   - cool posts
 ---
+This blog post documents my learning process of the LLaMAFactory code repository.
 
 # 1. 从命令行定位到程序入口
 
