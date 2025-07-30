@@ -565,7 +565,7 @@ create_modelcard_and_push(trainer, model_args, data_args, training_args, finetun
 
 **template = get_template_and_fix_tokenizer(tokenizer, data_args)**
 
-![image.png](images/blogs/llamafactory/image.png)
+![image.png](/images/blogs/llamafactory/image.png)
 
 ```python
 Template(
@@ -591,11 +591,11 @@ mm_plugin=Qwen2VLPlugin(image_token='<|image_pad|>', video_token='<|video_pad|>'
 
 对于 1 个 sample (SharegptDatasetConverter)
 
-![image.png](image%201.png)
+![image.png](/images/blogs/llamafactory/image%201.png)
 
 先抽出 “messages” 并转化为 aligned_messages：
 
-![image.png](image%202.png)
+![image.png](/images/blogs/llamafactory/image%202.png)
 
 ```python
 [
@@ -627,7 +627,7 @@ return output
 
 得到 align 后的数据格式：
 
-![image.png](image%203.png)
+![image.png](/images/blogs/llamafactory/image%203.png)
 
 ```python
 {
