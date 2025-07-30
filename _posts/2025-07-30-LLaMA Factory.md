@@ -655,7 +655,7 @@ return output
 }
 ```
 
-随后对单个 sample，首先将预定义的 template 中 slot 的 "{{content}}" 替换为相应 message 中的内容，从而得到数据的对话模板，并将其用 tokenizer 编码为 list[int]，其中 self 为前面加载的 template：
+随后对单个 sample，首先将 message 中相应内容插入预定义的 template 中的 slot，从而得到数据的对话模板，并将其用 tokenizer 编码为 list[int]，其中 self 为前面加载的 template：
 ```python
 for i, message in enumerate(messages):
     elements = []
