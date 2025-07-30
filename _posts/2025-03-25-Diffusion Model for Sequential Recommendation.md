@@ -1,3 +1,10 @@
+---
+title: 'Diffusion Model for Sequential Recommendation'
+date: 2025-03-25
+permalink: /posts/2025/03/Diffusion Model for Sequential Recommendation/
+tags:
+  - cool posts
+---
 This blog serves as a reading note for a series of papers on applying diffusion models to recommendation systems, especially sequential recommendation.
 
 # Diffusion for Recommendation
