@@ -195,7 +195,7 @@ def get_ray_args(args: Optional[Union[dict[str, Any], list[str]]] = None) -> Ray
 
 它的作用是返回一个 RayArguments 的 dataclass 类，返回形式为 tuple。
 
-- HfArgumentParser() 返回一个解析器 parser，它将字典、列表、命令行等参数配置解析为一种 RayArguments 的 dataclass 类，[这里介绍了什么是 dataclass](https://www.notion.so/code-23892d98c2e080e6b8efe9892dcf2a0f?pvs=21)。
+- HfArgumentParser() 返回一个解析器 parser，它将字典、列表、命令行等参数配置解析为一种 RayArguments 的 dataclass 类。
 - *_*parser*_*args() 返回参数的 dataclass，即一个 RayArguments ，返回 tuple 形式。
     
     ```c
@@ -368,7 +368,7 @@ get_template_and_fix_tokenizer
 ├── data_args.enable_thinking # 是否为推理模型开启thinking
 ├── template.fix_special_tokens # 确保使用template前，tokenizer有合适的eos token, pad token, 以及视作stop word的特殊token
 ├── template.fix_jinja_template # 将template定义的Jinja模板字串注入tokenizer的chat_template
-└── return: [***template**](https://www.notion.so/3-LlaMA-Factory-23492d98c2e0800b8c8acd74c22337eb?pvs=21)* # Template dataclass
+└── return: ***template*** # Template dataclass
 ```
 
 ## 3.3. dataset 加载
@@ -385,7 +385,7 @@ get_dataset
 │   │   ├── dataset.select # 确保数据集大小与dataset_attr定义的一致，且不超过max_samples
 │   │   └── align_dataset # 将数据集中样本组织格式标准化
 │		│		│		├── dataset_converter=get_dataset_converter # 从DATASET_CONVERTER=[AlpacaDatasetConverter, SharegptDatasetConverter]中选择
-│   │   │   └── [***dataset.map(dataset_converter, ...)***](https://www.notion.so/3-LlaMA-Factory-23492d98c2e0800b8c8acd74c22337eb?pvs=21) # 将数据集样本格式转化为: dict{key: "_prompt", "_response", "_systerm", "tools", "images", "videos", "audios"}
+│   │   │   └── ***dataset.map(dataset_converter, ...)*** # 将数据集样本格式转化为: dict{key: "_prompt", "_response", "_systerm", "tools", "images", "videos", "audios"}
 │   ├── merge_dataset # 依据不同mix_strategy将多个dataset合成为一个dataset  
 │   └── return: Union[Dataset, IterableDataset]
 ├── _get_process_dataset # 对dataset进行预处理
@@ -396,8 +396,8 @@ get_dataset
 │   │   ├── _encode_data_example
 │   │   │   ├── template.mm_plugin.process_message
 │   │   │   ├── template.mm_plugin.process_tokenids
-│   │   │   ├── [***template.encode_multirun***](https://www.notion.so/3-LlaMA-Factory-23492d98c2e0800b8c8acd74c22337eb?pvs=21) # 将example处理为问答对的token_ids, type: tuple(list[int], list[int])
-│   │   │   └── return: input_ids, [***labels***](https://www.notion.so/3-LlaMA-Factory-23492d98c2e0800b8c8acd74c22337eb?pvs=21) # list[int], list[int]
+│   │   │   ├── ***template.encode_multirun***# 将example处理为问答对的token_ids, type: tuple(list[int], list[int])
+│   │   │   └── return: input_ids, ***labels*** # list[int], list[int]
 │   │   ├── model_inputs # 使用greedy策略对输入的多个样本进行packing节省padding空间，并获取pack后sentence的attention_mask
 │   │   └── return model_inputs # dict{key: "input_ids", "attention_mask", "position_ids", "labels", "images", "videos", "audios"}
 │   └── return: Union[Dataset, IterableDataset]
@@ -565,7 +565,7 @@ create_modelcard_and_push(trainer, model_args, data_args, training_args, finetun
 
 **template = get_template_and_fix_tokenizer(tokenizer, data_args)**
 
-![image.png](image.png)
+![image.png](images/blogs/llamafactory/image.png)
 
 ```python
 Template(
@@ -599,10 +599,10 @@ mm_plugin=Qwen2VLPlugin(image_token='<|image_pad|>', video_token='<|video_pad|>'
 
 ```python
 [
-	{'role': 'user', 'content': '<image>Who are they?'}, 
-	{'role': 'assistant', 'content': "They're Kane and Gretzka from Bayern Munich."}, 
-	{'role': 'user', 'content': 'What are they doing?<image>'}, 
-	{'role': 'assistant', 'content': 'They are celebrating on the soccer field.'}
+    {'role': 'user', 'content': '<image>Who are they?'}, 
+    {'role': 'assistant', 'content': "They're Kane and Gretzka from Bayern Munich."}, 
+    {'role': 'user', 'content': 'What are they doing?<image>'}, 
+    {'role': 'assistant', 'content': 'They are celebrating on the soccer field.'}
 ]
 ```
 
@@ -631,19 +631,19 @@ return output
 
 ```python
 {
-	'_prompt': [
-								{'role': 'user', 'content': '<image>Who are they?'}, 
-								{'role': 'assistant', 'content': "They're Kane and Gretzka from Bayern Munich."}, 
-								{'role': 'user', 'content': 'What are they doing?<image>'}
-						 ], 
-	'_response': [
-									{'role': 'assistant', 'content': 'They are celebrating on the soccer field.'}
-							 ], 
-	'_system': '', 
-	'_tools': '', 
-	'_images': ['data\\mllm_demo_data/1.jpg', 'data\\mllm_demo_data/1.jpg'], 
-	'_videos': None, 
-	'_audios': None
+    '_prompt': [
+                   {'role': 'user', 'content': '<image>Who are they?'}, 
+ 		   {'role': 'assistant', 'content': "They're Kane and Gretzka from Bayern Munich."}, 
+		   {'role': 'user', 'content': 'What are they doing?<image>'}
+	       ], 
+    '_response': [
+		     {'role': 'assistant', 'content': 'They are celebrating on the soccer field.'}
+		 ], 
+    '_system': '', 
+    '_tools': '', 
+    '_images': ['data\\mllm_demo_data/1.jpg', 'data\\mllm_demo_data/1.jpg'], 
+    '_videos': None,
+    '_audios': None
 }
 ```
 
@@ -653,17 +653,17 @@ return output
 
 ```python
 {
-	"_prompt": [
-								{'content': "Identify the types of technology used in this passage.\nDesign thinking is a human-centered approach to innovation that draws from the designer's toolkit to integrate the needs of people, the possibilities of technology, and the requirements for success.", 'role': 'user'}
-						 ],
-	"_response": [
-									{'content': 'The technology mentioned in this passage is not specified, but rather is referred to generally as "the possibilities of technology" in the context of the design thinking approach to innovation.', 'role': 'assistant'}
-							 ],
-	"_system": '',
-	"_tools": '',
-	"_images": '',
-	"_videos": '',
-	"_audios": ''
+    "_prompt": [
+	           {'content': "Identify the types of technology used in this passage.\nDesign thinking is a human-centered approach to innovation that draws from the designer's toolkit to integrate the needs of people, the possibilities of technology, and the requirements for success.", 'role': 'user'}
+	       ],
+    "_response": [
+		     {'content': 'The technology mentioned in this passage is not specified, but rather is referred to generally as "the possibilities of technology" in the context of the design thinking approach to innovation.', 'role': 'assistant'}
+ 		 ],
+    "_system": '',
+    "_tools": '',
+    "_images": '',
+    "_videos": '',
+    "_audios": ''
 }
 ```
 
@@ -693,29 +693,27 @@ for i, message in enumerate(messages):
     encoded_messages.append(self._convert_elements_to_ids(tokenizer, elements))
 ```
 
-elements:
-
 ```python
 # first loop
 ## elements
 [
-	'<|im_start|>system\nYou are a helpful assistant.<|im_end|>\n', 
-	"<|im_start|>user\nIdentify the types of technology used in this passage.\nDesign thinking is a human-centered approach to innovation that draws from the designer's toolkit to integrate the needs of people, the possibilities of technology, and the requirements for success.<|im_end|>\n<|im_start|>assistant\n"
+    '<|im_start|>system\nYou are a helpful assistant.<|im_end|>\n', 
+    "<|im_start|>user\nIdentify the types of technology used in this passage.\nDesign thinking is a human-centered approach to innovation that draws from the designer's toolkit to integrate the needs of people, the possibilities of technology, and the requirements for success.<|im_end|>\n<|im_start|>assistant\n"
 ]
 ## encoded_messages
 [
-	[151644, 8948, 198, 2610, 525, 264, 10950, 17847, 13, 151645, 198, 151644, 872, 198, 28301, 1437, 279, 4494, 315, 5440, 1483, 304, 419, 21085, 624, 20470, 7274, 374, 264, 3738, 49382, 5486, 311, 18770, 429, 26643, 504, 279, 14692, 594, 65894, 311, 31072, 279, 3880, 315, 1251, 11, 279, 23607, 315, 5440, 11, 323, 279, 8502, 369, 2393, 13, 151645, 198, 151644, 77091, 198]
+    [151644, 8948, 198, 2610, 525, 264, 10950, 17847, 13, 151645, 198, 151644, 872, 198, 28301, 1437, 279, 4494, 315, 5440, 1483, 304, 419, 21085, 624, 20470, 7274, 374, 264, 3738, 49382, 5486, 311, 18770, 429, 26643, 504, 279, 14692, 594, 65894, 311, 31072, 279, 3880, 315, 1251, 11, 279, 23607, 315, 5440, 11, 323, 279, 8502, 369, 2393, 13, 151645, 198, 151644, 77091, 198]
 ]
 
 # second loop
 ## elements
 [
-	'The technology mentioned in this passage is not specified, but rather is referred to generally as "the possibilities of technology" in the context of the design thinking approach to innovation.<|im_end|>\n'
+    'The technology mentioned in this passage is not specified, but rather is referred to generally as "the possibilities of technology" in the context of the design thinking approach to innovation.<|im_end|>\n'
 ]
 ## encoded_messages
 [
-	[151644, 8948, 198, 2610, 525, 264, 10950, 17847, 13, 151645, 198, 151644, 872, 198, 28301, 1437, 279, 4494, 315, 5440, 1483, 304, 419, 21085, 624, 20470, 7274, 374, 264, 3738, 49382, 5486, 311, 18770, 429, 26643, 504, 279, 14692, 594, 65894, 311, 31072, 279, 3880, 315, 1251, 11, 279, 23607, 315, 5440, 11, 323, 279, 8502, 369, 2393, 13, 151645, 198, 151644, 77091, 198], 
-	[785, 5440, 9733, 304, 419, 21085, 374, 537, 5189, 11, 714, 4751, 374, 13862, 311, 8789, 438, 330, 1782, 23607, 315, 5440, 1, 304, 279, 2266, 315, 279, 2884, 7274, 5486, 311, 18770, 13, 151645, 198]
+    [151644, 8948, 198, 2610, 525, 264, 10950, 17847, 13, 151645, 198, 151644, 872, 198, 28301, 1437, 279, 4494, 315, 5440, 1483, 304, 419, 21085, 624, 20470, 7274, 374, 264, 3738, 49382, 5486, 311, 18770, 429, 26643, 504, 279, 14692, 594, 65894, 311, 31072, 279, 3880, 315, 1251, 11, 279, 23607, 315, 5440, 11, 323, 279, 8502, 369, 2393, 13, 151645, 198, 151644, 77091, 198], 
+    [785, 5440, 9733, 304, 419, 21085, 374, 537, 5189, 11, 714, 4751, 374, 13862, 311, 8789, 438, 330, 1782, 23607, 315, 5440, 1, 304, 279, 2266, 315, 279, 2884, 7274, 5486, 311, 18770, 13, 151645, 198]
 ]
 ```
 
