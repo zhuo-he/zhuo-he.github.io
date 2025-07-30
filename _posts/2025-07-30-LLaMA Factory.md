@@ -574,25 +574,6 @@ create_modelcard_and_push(trainer, model_args, data_args, training_args, finetun
 
 ![image.png](/images/blogs/llamafactory/image.png)
 
-```python
-Template(
-format_user=StringFormatter(slots=['<|im_start|>user\n{{content}}<|im_end|>\n<|im_start|>assistant\n'], tool_format=None), 
-format_assistant=StringFormatter(slots=['{{content}}<|im_end|>\n'], tool_format=None), 
-format_system=StringFormatter(slots=['<|im_start|>system\n{{content}}<|im_end|>\n'], tool_format=None), 
-format_function=FunctionFormatter(slots=['{{content}}<|im_end|>\n'], tool_format='qwen'), 
-format_observation=StringFormatter(slots=['<|im_start|>user\n<tool_response>\n{{content}}\n</tool_response><|im_end|>\n<|im_start|>assistant\n'], tool_format=None), 
-format_tools=ToolFormatter(slots=[], tool_format='qwen'), 
-format_prefix=EmptyFormatter(slots=[], tool_format=None), 
-default_system='You are a helpful assistant.', 
-stop_words=['<|im_end|>'], 
-thought_words=('<think>', '</think>'), 
-efficient_eos=False, 
-replace_eos=True, 
-replace_jinja_template=False, 
-enable_thinking=True, 
-mm_plugin=Qwen2VLPlugin(image_token='<|image_pad|>', video_token='<|video_pad|>', audio_token=None, expand_mm_tokens=True)
-)
-```
 
 **dataset.map(dataset_converter, ...)**
 
