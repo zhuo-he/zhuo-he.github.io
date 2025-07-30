@@ -1,4 +1,10 @@
-# 3. LlaMA Factory
+---
+title: 'LLaMAFactory Code Analysis'
+date: 2025-07-30
+permalink: /posts/2025/07/LLaMAFactory Code Analysis/
+tags:
+  - cool posts
+---
 
 # 1. 从命令行定位到程序入口
 
