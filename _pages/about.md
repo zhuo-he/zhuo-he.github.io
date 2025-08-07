@@ -9,4 +9,9 @@ redirect_from:
 
 I am a postgraduate student graduated from [Beijing Institute of Technology](https://www.bit.edu.cn/), under the supervision of [Prof. Shuang Li](https://shuangli.xyz/). I received my Bachelor's degree (2019-2023) and Master's degree (2023-2025) in [School of Mathematics and Statistics from Beijing Institute of Technology](https://math.bit.edu.cn/).
 
-At this stage, I am mainly focusing on multimodal learning and large language models.
+At this stage, I am mainly focusing on Multimodal Learning and Large Language Models.
+
+# 📖 Educations
+- *2023.06 – Present*, Ph.D. Student, School of Computer Science and Technology, Beijing Jiaotong University, Beijing, China  
+- *2019.09 – 2023.06*, B.Sc., School of Mathematics and Statistics, Beijing Jiaotong University, Beijing, China  
+- *2016.09 – 2019.06*, High School Diploma, Mingde High School, Changsha, China
