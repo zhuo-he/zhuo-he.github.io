@@ -9,7 +9,7 @@
 # Basic Site Settings
 locale                   : "en-US"
 site_theme               : "default"
-title                    : "Zhuo He / Personal Homepage"
+title                    : "Zhuo / Personal Homepage"
 title_separator          : "-"
 name                     : &name "Zhuo He"
 description              : &description "personal description"
@@ -25,7 +25,8 @@ author:
   avatar           : "me.png"
   name             : "Zhuo He"
   pronouns         : # example: "she/her"  
-  location         : "China"
+  bio              : "Master of Applied Statistics from Beijing Institute of Technology"
+  location         : "Guangzhou China"
   uri              : # URL
   email            : "zhuohe2056@gmail.com" 
 
