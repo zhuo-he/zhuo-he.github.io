@@ -11,6 +11,9 @@ I am a postgraduate student graduated from [Beijing Institute of Technology (北
 
 My main research interests during my master's degree are in Dynamic Transfer Learning and Causal Learning. At this stage, I am mainly focusing on Multimodal Learning and Large Language Models.
 
+# 💻 Publications
+- ``ICML 2025`` [Learning Time-Aware Causal Representation for Model Generalization in Evolving Domains](https://arxiv.org/abs/2506.17718), **Zhuo He**, Shuang Li, Wenze Song, Longhui Yuan, Jian Liang, Han Li, Kun Gai.
+
 # 📖 Educations
 - *2023.09 – 2025.06*, M.Sc., School of Mathematics and Statistics, Beijing Institute of Technology, Beijing, China  
 - *2019.09 – 2023.06*, B.Sc., School of Mathematics and Statistics, Beijing Institute of Technology, Beijing, China  
