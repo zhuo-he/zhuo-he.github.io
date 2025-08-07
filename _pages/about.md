@@ -12,6 +12,6 @@ I am a postgraduate student graduated from [Beijing Institute of Technology](htt
 At this stage, I am mainly focusing on Multimodal Learning and Large Language Models.
 
 # 📖 Educations
-- *2023.09 – 2025.06*, M.Sc. Student, School of Mathematics and Statistics, Beijing Institute of Technology, Beijing, China  
+- *2023.09 – 2025.06*, M.Sc., School of Mathematics and Statistics, Beijing Institute of Technology, Beijing, China  
 - *2019.09 – 2023.06*, B.Sc., School of Mathematics and Statistics, Beijing Institute of Technology, Beijing, China  
 - *2016.09 – 2019.06*, High School Diploma, Mingde High School, Changsha, China
